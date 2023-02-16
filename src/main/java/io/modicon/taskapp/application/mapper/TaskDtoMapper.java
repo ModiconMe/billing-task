@@ -19,6 +19,7 @@ public class TaskDtoMapper implements Function<TaskEntity, TaskDto> {
     @Override
     public TaskDto apply(TaskEntity task) {
         return TaskDto.builder()
+                .id(task.getId())
                 .description(task.getDescription())
                 .priorityType(task.getPriorityType().name())
                 .tags(task.getTags().stream().map(TagEntity::getTagName).collect(Collectors.toSet()))

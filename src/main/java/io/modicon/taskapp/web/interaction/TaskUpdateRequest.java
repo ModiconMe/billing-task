@@ -2,6 +2,7 @@ package io.modicon.taskapp.web.interaction;
 
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.annotation.JsonTypeName;
+import io.modicon.taskapp.domain.model.UserEntity;
 import lombok.*;
 import org.springframework.security.core.userdetails.UserDetails;
 
@@ -17,7 +18,7 @@ import java.util.Set;
 public class TaskUpdateRequest {
 
     @With
-    private UserDetails user;
+    private UserEntity user;
 
     private String priorityType;
     private String description;

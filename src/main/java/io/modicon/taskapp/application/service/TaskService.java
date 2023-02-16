@@ -4,14 +4,13 @@ import io.modicon.taskapp.application.mapper.TaskDtoMapper;
 import io.modicon.taskapp.domain.model.PriorityType;
 import io.modicon.taskapp.domain.model.TagEntity;
 import io.modicon.taskapp.domain.model.TaskEntity;
-import io.modicon.taskapp.domain.model.UserEntity;
 import io.modicon.taskapp.domain.repository.TagRepository;
 import io.modicon.taskapp.domain.repository.TaskRepository;
-import io.modicon.taskapp.infrastructure.exception.ApiException;
 import io.modicon.taskapp.web.interaction.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -26,12 +25,13 @@ public interface TaskService {
 
     TaskCreateResponse create(TaskCreateRequest request);
 
-    TaskUpdateResponse update(TaskUpdateRequest request);
+    TaskUpdateResponse update(String id, TaskUpdateRequest request);
 
     TaskDeleteResponse delete(String id);
 
     TaskGetByDateResponse getByDate(String date);
 
+    @Transactional
     @RequiredArgsConstructor
     @Service
     class Base implements TaskService {
@@ -42,6 +42,9 @@ public interface TaskService {
 
         @Override
         public TaskCreateResponse create(TaskCreateRequest request) {
+            if (taskRepository.findByIdAndCreator(request.getId(), request.getUser()).isPresent())
+                throw exception(HttpStatus.BAD_REQUEST, "task with that identifier already exist");
+
             List<TagEntity> tags = new ArrayList<>();
             if (request.getTags() != null) {
                 tags = request.getTags().stream()
@@ -59,7 +62,7 @@ public interface TaskService {
             }
 
             TaskEntity task = TaskEntity.builder()
-                    .id(UUID.randomUUID().toString())
+                    .id(request.getId())
                     .description(request.getDescription())
                     .createdAt(LocalDate.now())
                     .finishDate(request.getFinishDate())
@@ -74,8 +77,38 @@ public interface TaskService {
         }
 
         @Override
-        public TaskUpdateResponse update(TaskUpdateRequest request) {
-            return null;
+        public TaskUpdateResponse update(String id, TaskUpdateRequest request) {
+            TaskEntity task = taskRepository.findByIdAndCreator(id, request.getUser())
+                    .orElseThrow(() -> exception(HttpStatus.NOT_FOUND, "task not found..."));
+
+            List<TagEntity> tags = new ArrayList<>();
+            if (request.getTags() != null) {
+                tags = request.getTags().stream()
+                        .map((t) -> tagRepository.findById(t).orElseGet(() -> new TagEntity(t)))
+                        .collect(Collectors.toList());
+            }
+
+            PriorityType taskPriorityType = null;
+            if (request.getPriorityType() != null) {
+                try {
+                    taskPriorityType = PriorityType.valueOf(PriorityType.class, request.getPriorityType());
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    throw exception(HttpStatus.BAD_REQUEST,
+                            "wrong priority type for task, it only supports %s", Arrays.toString( PriorityType.values()));
+                }
+            }
+
+            task.toBuilder()
+                    .description(request.getDescription() != null ? request.getDescription() : task.getDescription())
+                    .finishDate(request.getFinishDate() != null ? request.getFinishDate() : task.getFinishDate())
+                    .priorityType(taskPriorityType != null ? taskPriorityType : task.getPriorityType())
+                    .tags(!tags.isEmpty() ? tags : task.getTags())
+                    .build();
+
+            taskRepository.save(task);
+
+            return new TaskUpdateResponse(taskDtoMapper.apply(task));
         }
 
         @Override
@@ -83,6 +116,7 @@ public interface TaskService {
             return null;
         }
 
+        @Transactional(readOnly = true)
         @Override
         public TaskGetByDateResponse getByDate(String date) {
             return null;

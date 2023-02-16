@@ -7,6 +7,7 @@ import java.util.Set;
 
 @Builder
 public record TaskDto(
+        String id,
         String priorityType,
         String description,
         LocalDate createdAt,

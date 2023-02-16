@@ -24,6 +24,8 @@ public class TaskCreateRequest {
     @JsonIgnore
     private UserEntity user;
 
+    @NotEmpty(message = "task identifier must be not empty")
+    private String id;
     @NotEmpty(message = "priority type must be not empty")
     private String priorityType;
     @NotEmpty(message = "description must be not empty")
