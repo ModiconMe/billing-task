@@ -99,7 +99,7 @@ public interface TaskService {
                 }
             }
 
-            task.toBuilder()
+            task = task.toBuilder()
                     .description(request.getDescription() != null ? request.getDescription() : task.getDescription())
                     .finishDate(request.getFinishDate() != null ? request.getFinishDate() : task.getFinishDate())
                     .priorityType(taskPriorityType != null ? taskPriorityType : task.getPriorityType())

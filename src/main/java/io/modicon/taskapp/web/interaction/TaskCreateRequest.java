@@ -8,6 +8,7 @@ import io.modicon.taskapp.domain.model.TagEntity;
 import io.modicon.taskapp.domain.model.UserEntity;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
 import lombok.*;
 import org.springframework.security.core.userdetails.UserDetails;
 
@@ -30,7 +31,7 @@ public class TaskCreateRequest {
     private String priorityType;
     @NotEmpty(message = "description must be not empty")
     private String description;
-    @NotEmpty(message = "finish date type must be not empty")
+    @NotNull(message = "finish date type must be not empty")
     private LocalDate finishDate;
     private Set<String> tags;
 }
