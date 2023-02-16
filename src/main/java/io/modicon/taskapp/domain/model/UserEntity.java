@@ -19,12 +19,10 @@ public class UserEntity implements UserDetails {
 
     @EqualsAndHashCode.Include
     @Id
-    private String id;
+    private String username;
 
     @Column(nullable = false)
     private String password;
-
-    private String username;
 
     @Singular
     @OneToMany(

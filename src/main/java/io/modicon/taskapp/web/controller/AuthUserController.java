@@ -13,6 +13,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -21,11 +22,10 @@ public interface AuthUserController {
     String BASE_URL_V1 = "/api/v1/users";
 
     @PostMapping("/register")
-    UserRegisterResponse register(UserRegisterRequest request);
+    UserRegisterResponse register(@RequestBody UserRegisterRequest request);
 
-    @SecurityRequirement(name = "basicAuth")
     @PostMapping("/login")
-    UserLoginResponse login(UserLoginRequest request);
+    UserLoginResponse login(@RequestBody UserLoginRequest request);
 
     @RequiredArgsConstructor
     @RestController
@@ -36,12 +36,12 @@ public interface AuthUserController {
 
         @Override
         public UserRegisterResponse register(UserRegisterRequest request) {
-            return null;
+            return userManagementService.register(request);
         }
 
         @Override
         public UserLoginResponse login(UserLoginRequest request) {
-            return null;
+            return userManagementService.login(request);
         }
     }
 
