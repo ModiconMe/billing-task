@@ -4,6 +4,7 @@ import io.modicon.taskapp.application.mapper.TaskDtoMapper;
 import io.modicon.taskapp.domain.model.PriorityType;
 import io.modicon.taskapp.domain.model.TagEntity;
 import io.modicon.taskapp.domain.model.TaskEntity;
+import io.modicon.taskapp.domain.model.UserEntity;
 import io.modicon.taskapp.domain.repository.TagRepository;
 import io.modicon.taskapp.domain.repository.TaskRepository;
 import io.modicon.taskapp.web.interaction.*;
@@ -16,7 +17,6 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.UUID;
 import java.util.stream.Collectors;
 
 import static io.modicon.taskapp.infrastructure.exception.ApiException.exception;
@@ -27,7 +27,7 @@ public interface TaskService {
 
     TaskUpdateResponse update(String id, TaskUpdateRequest request);
 
-    TaskDeleteResponse delete(String id);
+    TaskDeleteResponse delete(String id, UserEntity user);
 
     TaskGetByDateResponse getByDate(String date);
 
@@ -44,6 +44,9 @@ public interface TaskService {
         public TaskCreateResponse create(TaskCreateRequest request) {
             if (taskRepository.findByIdAndCreator(request.getId(), request.getUser()).isPresent())
                 throw exception(HttpStatus.BAD_REQUEST, "task with that identifier already exist");
+
+            if (request.getFinishDate().isBefore(LocalDate.now()))
+                throw exception(HttpStatus.BAD_REQUEST, "finish date cannot be earlier than today's date");
 
             List<TagEntity> tags = new ArrayList<>();
             if (request.getTags() != null) {
@@ -81,6 +84,9 @@ public interface TaskService {
             TaskEntity task = taskRepository.findByIdAndCreator(id, request.getUser())
                     .orElseThrow(() -> exception(HttpStatus.NOT_FOUND, "task not found..."));
 
+            if (request.getFinishDate().isBefore(LocalDate.now()))
+                throw exception(HttpStatus.BAD_REQUEST, "finish date cannot be earlier than today's date");
+
             List<TagEntity> tags = new ArrayList<>();
             if (request.getTags() != null) {
                 tags = request.getTags().stream()
@@ -112,8 +118,13 @@ public interface TaskService {
         }
 
         @Override
-        public TaskDeleteResponse delete(String id) {
-            return null;
+        public TaskDeleteResponse delete(String id, UserEntity user) {
+            TaskEntity task = taskRepository.findByIdAndCreator(id, user)
+                    .orElseThrow(() -> exception(HttpStatus.NOT_FOUND, "task not found..."));
+
+            taskRepository.delete(task);
+
+            return new TaskDeleteResponse(task.getId());
         }
 
         @Transactional(readOnly = true)
