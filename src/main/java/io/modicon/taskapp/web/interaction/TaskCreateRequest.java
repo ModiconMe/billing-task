@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import io.modicon.taskapp.domain.model.PriorityType;
 import io.modicon.taskapp.domain.model.TagEntity;
+import io.modicon.taskapp.domain.model.UserEntity;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotEmpty;
 import lombok.*;
@@ -21,7 +22,7 @@ public class TaskCreateRequest {
 
     @With
     @JsonIgnore
-    private UserDetails user;
+    private UserEntity user;
 
     @NotEmpty(message = "priority type must be not empty")
     private String priorityType;
