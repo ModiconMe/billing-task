@@ -1,0 +1,26 @@
+package io.modicon.taskapp.web.interaction;
+
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import com.fasterxml.jackson.annotation.JsonTypeName;
+import lombok.*;
+import org.springframework.security.core.userdetails.UserDetails;
+
+import java.time.LocalDate;
+import java.util.Set;
+
+@EqualsAndHashCode
+@NoArgsConstructor
+@AllArgsConstructor
+@Getter
+@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.WRAPPER_OBJECT)
+@JsonTypeName("task")
+public class TaskUpdateRequest {
+
+    @With
+    private UserDetails user;
+
+    private String priorityType;
+    private String description;
+    private LocalDate finishDate;
+    private Set<String> tags;
+}

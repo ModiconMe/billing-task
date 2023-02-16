@@ -41,4 +41,7 @@ public class TaskEntity {
             inverseJoinColumns = @JoinColumn(name = "tag_id")
     )
     private Set<TagEntity> tags;
+
+    @ManyToOne(cascade = CascadeType.MERGE)
+    private UserEntity creator;
 }

@@ -1,4 +1,4 @@
-package io.modicon.taskapp.web.dto;
+package io.modicon.taskapp.web.interaction;
 
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.annotation.JsonTypeName;
@@ -15,7 +15,7 @@ import lombok.NoArgsConstructor;
 @Getter
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.WRAPPER_OBJECT)
 @JsonTypeName("user")
-public class UserLoginRequest {
+public class UserRegisterRequest {
     @NotEmpty(message = "username must be not empty")
     private String username;
     @Size(min = 2, max = 32, message = "password must be up 2 and under 32 characters")

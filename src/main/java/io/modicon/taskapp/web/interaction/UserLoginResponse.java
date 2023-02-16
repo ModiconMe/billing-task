@@ -1,5 +1,6 @@
-package io.modicon.taskapp.web.dto;
+package io.modicon.taskapp.web.interaction;
 
+import io.modicon.taskapp.web.dto.UserDto;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;

@@ -3,19 +3,16 @@ package io.modicon.taskapp.application.service;
 import io.modicon.taskapp.application.mapper.UserDtoMapper;
 import io.modicon.taskapp.domain.model.UserEntity;
 import io.modicon.taskapp.domain.repository.UserRepository;
-import io.modicon.taskapp.infrastructure.exception.ApiException;
 import io.modicon.taskapp.infrastructure.security.jwt.JwtGeneration;
-import io.modicon.taskapp.web.dto.UserLoginRequest;
-import io.modicon.taskapp.web.dto.UserLoginResponse;
-import io.modicon.taskapp.web.dto.UserRegisterRequest;
-import io.modicon.taskapp.web.dto.UserRegisterResponse;
+import io.modicon.taskapp.web.interaction.UserLoginRequest;
+import io.modicon.taskapp.web.interaction.UserLoginResponse;
+import io.modicon.taskapp.web.interaction.UserRegisterRequest;
+import io.modicon.taskapp.web.interaction.UserRegisterResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-
-import java.util.UUID;
 
 import static io.modicon.taskapp.infrastructure.exception.ApiException.exception;
 

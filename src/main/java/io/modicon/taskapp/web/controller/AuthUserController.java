@@ -1,16 +1,10 @@
 package io.modicon.taskapp.web.controller;
 
 import io.modicon.taskapp.application.service.UserManagementService;
-import io.modicon.taskapp.web.dto.UserLoginRequest;
-import io.modicon.taskapp.web.dto.UserLoginResponse;
-import io.modicon.taskapp.web.dto.UserRegisterRequest;
-import io.modicon.taskapp.web.dto.UserRegisterResponse;
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.media.Content;
-import io.swagger.v3.oas.annotations.media.Schema;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
-import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.modicon.taskapp.web.interaction.UserLoginRequest;
+import io.modicon.taskapp.web.interaction.UserLoginResponse;
+import io.modicon.taskapp.web.interaction.UserRegisterRequest;
+import io.modicon.taskapp.web.interaction.UserRegisterResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
