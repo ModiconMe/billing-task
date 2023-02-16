@@ -12,6 +12,8 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -22,10 +24,10 @@ public interface AuthUserController {
     String BASE_URL_V1 = "/api/v1/users";
 
     @PostMapping("/register")
-    UserRegisterResponse register(@RequestBody UserRegisterRequest request);
+    ResponseEntity<UserRegisterResponse> register(@RequestBody UserRegisterRequest request);
 
     @PostMapping("/login")
-    UserLoginResponse login(@RequestBody UserLoginRequest request);
+    ResponseEntity<UserLoginResponse> login(@RequestBody UserLoginRequest request);
 
     @RequiredArgsConstructor
     @RestController
@@ -35,13 +37,17 @@ public interface AuthUserController {
         private final UserManagementService userManagementService;
 
         @Override
-        public UserRegisterResponse register(UserRegisterRequest request) {
-            return userManagementService.register(request);
+        public ResponseEntity<UserRegisterResponse> register(UserRegisterRequest request) {
+            userManagementService.register(request);
+            return ResponseEntity.ok().build();
         }
 
         @Override
-        public UserLoginResponse login(UserLoginRequest request) {
-            return userManagementService.login(request);
+        public ResponseEntity<UserLoginResponse> login(UserLoginRequest request) {
+            UserLoginResponse response = userManagementService.login(request);
+            return ResponseEntity.ok()
+                    .header(HttpHeaders.AUTHORIZATION, response.getToken())
+                    .body(response);
         }
     }
 

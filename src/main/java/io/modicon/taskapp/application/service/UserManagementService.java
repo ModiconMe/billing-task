@@ -4,6 +4,7 @@ import io.modicon.taskapp.application.mapper.UserDtoMapper;
 import io.modicon.taskapp.domain.model.UserEntity;
 import io.modicon.taskapp.domain.repository.UserRepository;
 import io.modicon.taskapp.infrastructure.exception.ApiException;
+import io.modicon.taskapp.infrastructure.security.jwt.JwtGeneration;
 import io.modicon.taskapp.web.dto.UserLoginRequest;
 import io.modicon.taskapp.web.dto.UserLoginResponse;
 import io.modicon.taskapp.web.dto.UserRegisterRequest;
@@ -32,6 +33,7 @@ public interface UserManagementService {
         private final UserRepository userRepository;
         private final PasswordEncoder passwordEncoder;
         private final UserDtoMapper userDtoMapper;
+        private final JwtGeneration jwtGeneration;
 
         @Override
         public UserRegisterResponse register(UserRegisterRequest request) {
@@ -57,7 +59,7 @@ public interface UserManagementService {
             if (!passwordEncoder.matches(request.getPassword(), user.getPassword()))
                 throw exception(HttpStatus.FORBIDDEN, "wrong password");
 
-            String token = "token";
+            String token = jwtGeneration.generateAccessToken(user);
 
             return new UserLoginResponse(userDtoMapper.apply(user), token);
         }
