@@ -5,6 +5,7 @@ import io.modicon.taskapp.web.interaction.UserLoginRequest;
 import io.modicon.taskapp.web.interaction.UserLoginResponse;
 import io.modicon.taskapp.web.interaction.UserRegisterRequest;
 import io.modicon.taskapp.web.interaction.UserRegisterResponse;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
@@ -18,10 +19,10 @@ public interface AuthUserController {
     String BASE_URL_V1 = "/api/v1/users";
 
     @PostMapping("/register")
-    ResponseEntity<UserRegisterResponse> register(@RequestBody UserRegisterRequest request);
+    ResponseEntity<UserRegisterResponse> register(@Valid @RequestBody UserRegisterRequest request);
 
     @PostMapping("/login")
-    ResponseEntity<UserLoginResponse> login(@RequestBody UserLoginRequest request);
+    ResponseEntity<UserLoginResponse> login(@Valid @RequestBody UserLoginRequest request);
 
     @RequiredArgsConstructor
     @RestController
