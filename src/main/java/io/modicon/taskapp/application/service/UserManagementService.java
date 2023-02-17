@@ -2,7 +2,6 @@ package io.modicon.taskapp.application.service;
 
 import io.modicon.taskapp.application.mapper.UserDtoMapper;
 import io.modicon.taskapp.domain.model.UserEntity;
-import io.modicon.taskapp.domain.repository.JpaUserRepository;
 import io.modicon.taskapp.domain.repository.UserDataSource;
 import io.modicon.taskapp.infrastructure.security.jwt.JwtGeneration;
 import io.modicon.taskapp.web.interaction.UserLoginRequest;
@@ -36,7 +35,7 @@ public interface UserManagementService {
         @Override
         public UserRegisterResponse register(UserRegisterRequest request) {
             String username = request.getUsername();
-            userDataSource.existById(request.getUsername());
+            userDataSource.validateNotExist(request.getUsername());
 
             UserEntity user = UserEntity.builder()
                     .username(username)

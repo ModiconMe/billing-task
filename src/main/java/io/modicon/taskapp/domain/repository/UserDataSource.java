@@ -9,7 +9,7 @@ import static io.modicon.taskapp.infrastructure.exception.ApiException.exception
 
 public interface UserDataSource {
     UserEntity findById(String id);
-    boolean existById(String id);
+    void validateNotExist(String id);
     UserEntity save(UserEntity user);
 
     @RequiredArgsConstructor
@@ -24,10 +24,9 @@ public interface UserDataSource {
         }
 
         @Override
-        public boolean existById(String id) {
+        public void validateNotExist(String id) {
             if (repository.existsById(id))
                 throw exception(HttpStatus.BAD_REQUEST, "user with username [%s] is already exist", id);
-            return true;
         }
 
         @Override
