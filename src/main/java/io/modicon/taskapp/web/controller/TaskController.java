@@ -40,9 +40,6 @@ public interface TaskController {
     TaskGetGroupByPriorityType get(@RequestParam(value = "page", defaultValue = "0") String page,
                                    @RequestParam(value = "limit", defaultValue = "20") String limit);
 
-    @PostMapping("/uploadFile/{taskName}")
-    TaskFileUploadResponse upload(@RequestParam(value = "file") MultipartFile file, @PathVariable String taskName);
-
     @RequiredArgsConstructor
     @RestController
     @RequestMapping(BASE_URL_V1)
@@ -74,11 +71,6 @@ public interface TaskController {
         @Override
         public TaskGetGroupByPriorityType get(String page, String limit) {
             return taskService.get(page, limit);
-        }
-
-        @Override
-        public TaskFileUploadResponse upload(MultipartFile file, String taskName) {
-            return taskService.upload(new TaskFileUploadRequest(taskName, file));
         }
     }
 }

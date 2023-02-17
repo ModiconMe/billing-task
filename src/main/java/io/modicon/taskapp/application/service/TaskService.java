@@ -37,8 +37,6 @@ public interface TaskService {
 
     TaskGetGroupByPriorityType get(String page, String limit);
 
-    TaskFileUploadResponse upload(TaskFileUploadRequest request);
-
     @Slf4j
     @Transactional
     @RequiredArgsConstructor
@@ -48,7 +46,6 @@ public interface TaskService {
         private final TaskRepository taskRepository;
         private final TagRepository tagRepository;
         private final TaskDtoMapper taskDtoMapper;
-        private final FileManagementService fileManagementService;
 
         @Override
         public TaskCreateResponse create(TaskCreateRequest request) {
@@ -190,12 +187,5 @@ public interface TaskService {
             return new TaskGetGroupByPriorityType(priorityTaskMap);
         }
 
-        @Override
-        public TaskFileUploadResponse upload(TaskFileUploadRequest request) {
-            TaskEntity task = taskRepository.findById(request.getTaskName()).orElseThrow(() ->
-                    exception(HttpStatus.NOT_FOUND, "task not found..."));
-
-            return new TaskFileUploadResponse(fileManagementService.store(task, request.getFile()));
-        }
     }
 }
