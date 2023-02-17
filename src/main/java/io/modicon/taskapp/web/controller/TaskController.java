@@ -3,6 +3,7 @@ package io.modicon.taskapp.web.controller;
 import io.modicon.taskapp.application.service.TaskService;
 import io.modicon.taskapp.domain.model.UserEntity;
 import io.modicon.taskapp.web.interaction.*;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -14,15 +15,18 @@ public interface TaskController {
 
     String BASE_URL_V1 = "api/v1/tasks";
 
+    @SecurityRequirement(name = "Bearer Authentication")
     @PostMapping
     TaskCreateResponse create(@Valid @RequestBody TaskCreateRequest request,
                               @AuthenticationPrincipal UserEntity user);
 
+    @SecurityRequirement(name = "Bearer Authentication")
     @PutMapping("/{id}")
     TaskUpdateResponse update(@PathVariable String id,
                               @Valid @RequestBody TaskUpdateRequest request,
                               @AuthenticationPrincipal UserEntity user);
 
+    @SecurityRequirement(name = "Bearer Authentication")
     @DeleteMapping("/{id}")
     TaskDeleteResponse delete(@PathVariable String id,
                               @AuthenticationPrincipal UserEntity user);

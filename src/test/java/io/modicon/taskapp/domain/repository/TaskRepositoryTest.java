@@ -22,9 +22,9 @@ class TaskRepositoryTest {
     @Test
     void shouldFindByTagContaining() {
         // given
-        TagEntity tag1 = new TagEntity("tag1");
-        TagEntity tag2 = new TagEntity("tag2");
-        TagEntity tag3 = new TagEntity("tag3");
+        TagEntity tag1 = new TagEntity("tag1", 0L);
+        TagEntity tag2 = new TagEntity("tag2", 1L);
+        TagEntity tag3 = new TagEntity("tag3", 0L);
         TaskEntity task = TaskEntity.builder()
                 .id("taskid")
                 .tag(tag1)

@@ -1,15 +1,16 @@
 package io.modicon.taskapp.application.service;
 
+import io.modicon.taskapp.application.mapper.TagDtoMapper;
 import io.modicon.taskapp.application.mapper.TaskDtoMapper;
 import io.modicon.taskapp.domain.model.TagEntity;
 import io.modicon.taskapp.domain.model.TaskEntity;
 import io.modicon.taskapp.domain.repository.TagRepository;
 import io.modicon.taskapp.domain.repository.TaskRepository;
-import io.modicon.taskapp.infrastructure.exception.ApiException;
 import io.modicon.taskapp.web.interaction.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -22,10 +23,11 @@ public interface TagService {
 
     TagCreateResponse create(TagCreateRequest request);
 
-    TagUpdateResponse update(TagUpdateRequest withUpdatedTag);
+    TagUpdateResponse update(TagUpdateRequest request);
 
     TagDeleteResponse delete(String tagName);
 
+    @Transactional
     @RequiredArgsConstructor
     @Service
     class Base implements TagService {
@@ -33,7 +35,9 @@ public interface TagService {
         private final TagRepository tagRepository;
         private final TaskRepository taskRepository;
         private final TaskDtoMapper taskDtoMapper;
+        private final TagDtoMapper tagDtoMapper;
 
+        @Transactional(readOnly = true)
         @Override
         public TagGetByIdWithTaskResponse getTagWithTasks(String tagName) {
             TagEntity tag = tagRepository.findById(tagName)
@@ -41,27 +45,52 @@ public interface TagService {
 
             List<TaskEntity> tasks = taskRepository.findByTagsContaining(tag);
 
-            return new TagGetByIdWithTaskResponse(tagName, tasks.stream().map(taskDtoMapper).toList());
+            return new TagGetByIdWithTaskResponse(tagDtoMapper.apply(tag), tasks.stream().map(taskDtoMapper).toList());
         }
 
+        @Transactional(readOnly = true)
         @Override
         public TagGetAllWithTaskExistedResponse getAllTagsWithExistedTasks() {
-            return null;
+            List<TagEntity> tags = tagRepository.findAllByTaskCountIsGreaterThan(0L);
+            return new TagGetAllWithTaskExistedResponse(tags.stream().map(tagDtoMapper).toList());
         }
 
         @Override
         public TagCreateResponse create(TagCreateRequest request) {
-            return null;
+            String tagName = request.getTag();
+            if (tagRepository.existsById(tagName))
+                throw exception(HttpStatus.BAD_REQUEST, "tag [%s] already exist", tagName);
+
+            TagEntity tag = new TagEntity(tagName, 0L);
+            tagRepository.save(tag);
+
+            return new TagCreateResponse(tagDtoMapper.apply(tag));
         }
 
         @Override
-        public TagUpdateResponse update(TagUpdateRequest withUpdatedTag) {
-            return null;
+        public TagUpdateResponse update(TagUpdateRequest request) {
+            String updatedTagName = request.getUpdatedTag();
+            TagEntity tag = tagRepository.findById(updatedTagName)
+                    .orElseThrow(() -> exception(HttpStatus.NOT_FOUND, "tag [%s] not found", updatedTagName));
+
+            String newTagName = request.getTag();
+            if (tagRepository.existsById(newTagName))
+                throw exception(HttpStatus.BAD_REQUEST, "tag [%s] already exist", newTagName);
+
+            tag.setNewName(newTagName); // set new name
+
+            return new TagUpdateResponse(tagDtoMapper.apply(tag));
         }
 
         @Override
         public TagDeleteResponse delete(String tagName) {
-            return null;
+            TagEntity tag = tagRepository.findById(tagName)
+                    .orElseThrow(() -> exception(HttpStatus.NOT_FOUND, "tag [%s] not found", tagName));
+
+            taskRepository.deleteByTagsContaining(tag);
+            tagRepository.delete(tag);
+
+            return new TagDeleteResponse(tagDtoMapper.apply(tag));
         }
     }
 }

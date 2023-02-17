@@ -2,6 +2,7 @@ package io.modicon.taskapp.web.controller;
 
 import io.modicon.taskapp.application.service.TagService;
 import io.modicon.taskapp.web.interaction.*;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
@@ -16,12 +17,15 @@ public interface TagController {
     @GetMapping
     TagGetAllWithTaskExistedResponse getAllTagsWithExistedTasks();
 
+    @SecurityRequirement(name = "Bearer Authentication")
     @PostMapping
     TagCreateResponse create(@Valid @RequestBody TagCreateRequest request);
 
+    @SecurityRequirement(name = "Bearer Authentication")
     @PutMapping("/{tagName}")
     TagUpdateResponse update(@PathVariable String tagName, @Valid @RequestBody TagUpdateRequest request);
 
+    @SecurityRequirement(name = "Bearer Authentication")
     @DeleteMapping("/{tagName}")
     TagDeleteResponse delete(@PathVariable String tagName);
 

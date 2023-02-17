@@ -43,6 +43,7 @@ public class SecurityConfig {
                 .and()
                 .authorizeHttpRequests()
                 .requestMatchers(SWAGGER).permitAll()
+                .requestMatchers(HttpMethod.GET).permitAll()
                 .requestMatchers(HttpMethod.POST, REGISTER_AND_LOGIN).permitAll()
                 .anyRequest().authenticated()
                 .and()

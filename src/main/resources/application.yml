@@ -21,6 +21,6 @@ spring:
 
 jwt:
   sign-key: secretsecretsecretsecretsecretsecret
-  token-prefix: Token
+  token-prefix: Bearer
   access-valid-time: 1
   issuer: Billing

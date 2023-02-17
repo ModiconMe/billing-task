@@ -11,4 +11,5 @@ import java.util.Optional;
 public interface TaskRepository extends JpaRepository<TaskEntity, String> {
     Optional<TaskEntity> findByIdAndCreator(String id, UserEntity creator);
     List<TaskEntity> findByTagsContaining(TagEntity tag);
+    void deleteByTagsContaining(TagEntity tag);
 }

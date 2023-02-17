@@ -51,17 +51,17 @@ public interface TaskService {
             List<TagEntity> tags = new ArrayList<>();
             if (request.getTags() != null) {
                 tags = request.getTags().stream()
-                        .map((t) -> tagRepository.findById(t).orElseGet(() -> new TagEntity(t)))
+                        .map((t) -> tagRepository.findById(t).orElseGet(() -> new TagEntity(t, 0L)))
                         .collect(Collectors.toList());
+                tags.forEach(TagEntity::addTask);
             }
 
             PriorityType taskPriorityType;
             try {
-                taskPriorityType = PriorityType.valueOf(PriorityType.class, request.getPriorityType());
-            } catch (Exception e) {
-                e.printStackTrace();
+                taskPriorityType = PriorityType.valueOf(PriorityType.class, request.getPriorityType().toUpperCase());
+            } catch (IllegalArgumentException e) {
                 throw exception(HttpStatus.BAD_REQUEST,
-                        "wrong priority type for task, it only supports %s", Arrays.toString( PriorityType.values()));
+                        "wrong priority type for task, it only supports %s", Arrays.toString(PriorityType.values()));
             }
 
             TaskEntity task = TaskEntity.builder()
@@ -90,8 +90,9 @@ public interface TaskService {
             List<TagEntity> tags = new ArrayList<>();
             if (request.getTags() != null) {
                 tags = request.getTags().stream()
-                        .map((t) -> tagRepository.findById(t).orElseGet(() -> new TagEntity(t)))
+                        .map((t) -> tagRepository.findById(t).orElseGet(() -> new TagEntity(t, 0L)))
                         .collect(Collectors.toList());
+                tags.forEach(TagEntity::addTask);
             }
 
             PriorityType taskPriorityType = null;
