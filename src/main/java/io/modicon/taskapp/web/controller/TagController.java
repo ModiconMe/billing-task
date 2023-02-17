@@ -34,27 +34,27 @@ public interface TagController {
 
         @Override
         public TagGetByIdWithTaskResponse getTagWithTasks(String tagName) {
-            return null;
+            return tagService.getTagWithTasks(tagName);
         }
 
         @Override
         public TagGetAllWithTaskExistedResponse getAllTagsWithExistedTasks() {
-            return null;
+            return tagService.getAllTagsWithExistedTasks();
         }
 
         @Override
         public TagCreateResponse create(TagCreateRequest request) {
-            return null;
+            return tagService.create(request);
         }
 
         @Override
         public TagUpdateResponse update(String tagName, TagUpdateRequest request) {
-            return null;
+            return tagService.update(request.withUpdatedTag(tagName));
         }
 
         @Override
         public TagDeleteResponse delete(String tagName) {
-            return null;
+            return tagService.delete(tagName);
         }
     }
 
