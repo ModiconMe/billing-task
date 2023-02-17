@@ -9,14 +9,18 @@ import io.modicon.taskapp.domain.repository.TagRepository;
 import io.modicon.taskapp.domain.repository.TaskRepository;
 import io.modicon.taskapp.web.interaction.*;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.lang.reflect.Field;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static io.modicon.taskapp.infrastructure.exception.ApiException.exception;
@@ -29,7 +33,7 @@ public interface TaskService {
 
     TaskDeleteResponse delete(String id, UserEntity user);
 
-    TaskGetByDateResponse getByDate(String date);
+    TaskGetByDateResponse getByDate(String date, String page, String limit);
 
     @Transactional
     @RequiredArgsConstructor
@@ -130,8 +134,30 @@ public interface TaskService {
 
         @Transactional(readOnly = true)
         @Override
-        public TaskGetByDateResponse getByDate(String date) {
-            return null;
+        public TaskGetByDateResponse getByDate(String date, String page, String limit) {
+            LocalDate parsedDate = LocalDate.parse(date);
+
+            Optional<Field> fieldToSort = Arrays
+                    .stream(TaskEntity.class.getDeclaredFields())
+                    .filter(f -> f.getType().equals(PriorityType.class))
+                    .findFirst();
+
+            List<TaskEntity> tasks;
+            if (fieldToSort.isPresent())
+                tasks = taskRepository.findByFinishDateGreaterThanEqual(parsedDate,
+                        PageRequest.of(
+                                Integer.parseInt(page),
+                                Integer.parseInt(limit),
+                                Sort.by(fieldToSort.get().getName()))
+                );
+            else
+                tasks = taskRepository.findByFinishDateGreaterThanEqual(parsedDate,
+                        PageRequest.of(
+                                Integer.parseInt(page),
+                                Integer.parseInt(limit))
+                );
+
+            return new TaskGetByDateResponse(tasks.stream().map(taskDtoMapper).toList());
         }
     }
 }

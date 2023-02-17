@@ -31,6 +31,8 @@ public interface TaskController {
 
     @GetMapping
     TaskGetByDateResponse get(@RequestParam(value = "finish_date", required = false) String date,
+                              @RequestParam(value = "page", defaultValue = "0") String page,
+                              @RequestParam(value = "limit", defaultValue = "20") String limit,
                               @AuthenticationPrincipal UserEntity user);
 
     @RequiredArgsConstructor
@@ -56,8 +58,8 @@ public interface TaskController {
         }
 
         @Override
-        public TaskGetByDateResponse get(String date, UserEntity user) {
-            return taskService.getByDate(date);
+        public TaskGetByDateResponse get(String date, String page, String limit, UserEntity user) {
+            return taskService.getByDate(date, page, limit);
         }
     }
 }

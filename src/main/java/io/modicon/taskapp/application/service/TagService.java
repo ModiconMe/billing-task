@@ -60,7 +60,7 @@ public interface TagService {
                         PageRequest.of(
                                 Integer.parseInt(page),
                                 Integer.parseInt(limit),
-                                Sort.by(fieldToSort.get().getName()).descending())
+                                Sort.by(fieldToSort.get().getName()))
                 );
             else
                 tasks = taskRepository.findByTagsContaining(tag,
