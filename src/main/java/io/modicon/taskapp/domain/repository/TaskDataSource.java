@@ -27,7 +27,7 @@ public interface TaskDataSource {
 
     List<TaskEntity> findByTag(TagEntity tag);
 
-    List<TaskEntity> findByTag(TagEntity tag, Pageable pageable);
+    List<TaskEntity> findByTag(TagEntity tag, String page, String limit);
 
     List<TaskEntity> findByFinishDateGreaterThanEqual(LocalDate finishDate, String page, String limit);
 
@@ -66,8 +66,8 @@ public interface TaskDataSource {
 
         @Transactional(readOnly = true)
         @Override
-        public List<TaskEntity> findByTag(TagEntity tag, Pageable pageable) {
-            return jpaTaskRepository.findByTag(tag, pageable);
+        public List<TaskEntity> findByTag(TagEntity tag, String page, String limit) {
+            return jpaTaskRepository.findByTag(tag, PageRequest.of(Integer.parseInt(page), Integer.parseInt(limit)));
         }
 
         @Transactional(readOnly = true)

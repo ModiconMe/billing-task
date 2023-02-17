@@ -32,7 +32,6 @@ class TaskRepositoryTest {
     private final TaskEntity importantTask;
     private final TaskEntity commonTask;
     private final TagEntity tag;
-    private final TagEntity notExistedTag;
 
     {
         creator = UserEntity.builder()
@@ -40,7 +39,6 @@ class TaskRepositoryTest {
                 .password("password")
                 .build();
         tag = new TagEntity("tag", 1L);
-        notExistedTag = new TagEntity("notExistedTag", 1L);
         importantTask = TaskEntity.builder()
                 .id("taskid1")
                 .tag(tag)
