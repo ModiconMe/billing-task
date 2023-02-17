@@ -55,7 +55,6 @@ public interface FileManagementService {
                     throw exception(HttpStatus.BAD_REQUEST, "Sorry! Filename contains invalid path sequence " + fileName);
                 }
 
-                // Copy file to the target location (Replacing existing file with the same name)
                 String taskName = task.getId();
                 UUID fileId = UUID.randomUUID();
                 Path targetLocation = this.fileStorageLocation.resolve(taskName + separator + fileId + "_" + fileName);

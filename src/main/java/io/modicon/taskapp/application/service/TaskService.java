@@ -149,14 +149,14 @@ public interface TaskService {
                     .findFirst();
 
             List<TaskEntity> tasks;
-            tasks = fieldToSort.map(field -> taskRepository.findAll(PageRequest.of(
+            tasks = fieldToSort.map(field -> taskRepository.findByFinishDateGreaterThanEqual(parsedDate, PageRequest.of(
                             Integer.parseInt(page),
                             Integer.parseInt(limit),
-                            Sort.by(field.getName()))).getContent())
-                    .orElseGet(() -> taskRepository.findAll(PageRequest.of(
+                            Sort.by(field.getName()))))
+                    .orElseGet(() -> taskRepository.findByFinishDateGreaterThanEqual(parsedDate, PageRequest.of(
                             Integer.parseInt(page),
                             Integer.parseInt(limit))
-                    ).getContent());
+                    ));
 
             return new TaskGetByDateResponse(tasks.stream().map(taskDtoMapper).toList());
         }

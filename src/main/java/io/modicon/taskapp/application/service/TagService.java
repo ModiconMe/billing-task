@@ -55,14 +55,14 @@ public interface TagService {
                     .findFirst();
 
             List<TaskEntity> tasks;
-            tasks = fieldToSort.map(field -> taskRepository.findAll(PageRequest.of(
+            tasks = fieldToSort.map(field -> taskRepository.findByTagsContaining(tag, PageRequest.of(
                             Integer.parseInt(page),
                             Integer.parseInt(limit),
-                            Sort.by(field.getName()))).getContent())
-                    .orElseGet(() -> taskRepository.findAll(PageRequest.of(
+                            Sort.by(field.getName()))))
+                    .orElseGet(() -> taskRepository.findByTagsContaining(tag, PageRequest.of(
                             Integer.parseInt(page),
                             Integer.parseInt(limit))
-                    ).getContent());
+                    ));
 
             return new TagGetByIdWithTaskResponse(tagDtoMapper.apply(tag), tasks.stream().map(taskDtoMapper).toList());
         }
