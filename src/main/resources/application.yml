@@ -19,6 +19,10 @@ spring:
         format_sql: true
     show-sql: true
 
+  cache:
+    caffeine:
+      spec: maximumSize=48, expireAfterAccess=1m
+
 jwt:
   sign-key: secretsecretsecretsecretsecretsecret
   token-prefix: Bearer

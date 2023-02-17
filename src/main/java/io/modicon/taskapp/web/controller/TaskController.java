@@ -6,6 +6,7 @@ import io.modicon.taskapp.web.interaction.*;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
@@ -65,6 +66,7 @@ public interface TaskController {
             return taskService.get(date, page, limit);
         }
 
+        @Cacheable(value = "tasks")
         @Override
         public TaskGetGroupByPriorityType get(String page, String limit) {
             return taskService.get(page, limit);
