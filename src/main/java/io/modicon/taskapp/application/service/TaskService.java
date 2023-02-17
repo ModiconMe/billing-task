@@ -7,6 +7,7 @@ import io.modicon.taskapp.domain.model.TaskEntity;
 import io.modicon.taskapp.domain.model.UserEntity;
 import io.modicon.taskapp.domain.repository.JpaTagRepository;
 import io.modicon.taskapp.domain.repository.JpaTaskRepository;
+import io.modicon.taskapp.domain.repository.TaskDataSource;
 import io.modicon.taskapp.web.dto.TaskDto;
 import io.modicon.taskapp.web.interaction.*;
 import lombok.RequiredArgsConstructor;
@@ -41,15 +42,14 @@ public interface TaskService {
     @Service
     class Base implements TaskService {
 
-        private final JpaTaskRepository taskRepository;
+        private final TaskDataSource taskDataSource;
         private final JpaTagRepository tagRepository;
         private final TaskDtoMapper taskDtoMapper;
         private final TaskFileService taskFileService;
 
         @Override
         public TaskCreateResponse create(TaskCreateRequest request) {
-            if (taskRepository.findByIdAndCreator(request.getId(), request.getUser()).isPresent())
-                throw exception(HttpStatus.BAD_REQUEST, "task with that identifier already exist");
+            taskDataSource.validateExistByIdAndCreator(request.getId(), request.getUser());
 
             if (request.getFinishDate().isBefore(LocalDate.now()))
                 throw exception(HttpStatus.BAD_REQUEST, "finish date cannot be earlier than today's date");
@@ -76,15 +76,14 @@ public interface TaskService {
                     .creator(request.getUser())
                     .build();
 
-            taskRepository.save(task);
+            taskDataSource.save(task);
 
             return new TaskCreateResponse(taskDtoMapper.apply(task));
         }
 
         @Override
         public TaskUpdateResponse update(String id, TaskUpdateRequest request) {
-            TaskEntity task = taskRepository.findByIdAndCreator(id, request.getUser())
-                    .orElseThrow(() -> exception(HttpStatus.NOT_FOUND, "task not found..."));
+            TaskEntity task = taskDataSource.findByIdAndCreator(id, request.getUser());
 
             if (request.getFinishDate().isBefore(LocalDate.now()))
                 throw exception(HttpStatus.BAD_REQUEST, "finish date cannot be earlier than today's date");
@@ -123,20 +122,19 @@ public interface TaskService {
                     .tag(tag != null ? tag : task.getTag())
                     .build();
 
-            taskRepository.save(task);
+            taskDataSource.save(task);
 
             return new TaskUpdateResponse(taskDtoMapper.apply(task));
         }
 
         @Override
         public TaskDeleteResponse delete(String id, UserEntity user) {
-            TaskEntity task = taskRepository.findByIdAndCreator(id, user)
-                    .orElseThrow(() -> exception(HttpStatus.NOT_FOUND, "task not found..."));
+            TaskEntity task = taskDataSource.findByIdAndCreator(id, user);
 
             task.getTag().removeTask();
             tagRepository.delete(task.getTag());
 
-            taskRepository.delete(task);
+            taskDataSource.delete(task);
             taskFileService.deleteTaskFiles(id);
 
             return new TaskDeleteResponse(task.getId());
@@ -147,40 +145,14 @@ public interface TaskService {
         public TaskGetByDateResponse get(String date, String page, String limit) {
             LocalDate parsedDate = LocalDate.parse(date);
 
-            Optional<Field> fieldToSort = Arrays
-                    .stream(TaskEntity.class.getDeclaredFields())
-                    .filter(f -> f.getType().equals(PriorityType.class))
-                    .findFirst();
-
-            List<TaskEntity> tasks;
-            tasks = fieldToSort.map(field -> taskRepository.findByFinishDateGreaterThanEqual(parsedDate, PageRequest.of(
-                            Integer.parseInt(page),
-                            Integer.parseInt(limit),
-                            Sort.by(field.getName()))))
-                    .orElseGet(() -> taskRepository.findByFinishDateGreaterThanEqual(parsedDate, PageRequest.of(
-                            Integer.parseInt(page),
-                            Integer.parseInt(limit))
-                    ));
+            List<TaskEntity> tasks = taskDataSource.findByFinishDateGreaterThanEqual(parsedDate, page, limit);
 
             return new TaskGetByDateResponse(tasks.stream().map(taskDtoMapper).toList());
         }
 
         @Override
         public TaskGetGroupByPriorityType get(String page, String limit) {
-            Optional<Field> fieldToSort = Arrays
-                    .stream(TaskEntity.class.getDeclaredFields())
-                    .filter(f -> f.getType().equals(PriorityType.class))
-                    .findFirst();
-
-            List<TaskEntity> tasks;
-            tasks = fieldToSort.map(field -> taskRepository.findAll(PageRequest.of(
-                            Integer.parseInt(page),
-                            Integer.parseInt(limit),
-                            Sort.by(field.getName()))).getContent())
-                    .orElseGet(() -> taskRepository.findAll(PageRequest.of(
-                            Integer.parseInt(page),
-                            Integer.parseInt(limit))
-                    ).getContent());
+            List<TaskEntity> tasks = taskDataSource.findAll(page, limit);
 
             Map<PriorityType, List<TaskDto>> priorityTaskMap = new LinkedHashMap<>();
             Arrays.stream(PriorityType.values()).forEach(p -> {
