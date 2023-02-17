@@ -4,6 +4,7 @@ import io.modicon.taskapp.domain.model.FileData;
 import io.modicon.taskapp.domain.model.TaskEntity;
 import io.modicon.taskapp.domain.repository.TaskRepository;
 import io.modicon.taskapp.infrastructure.config.ApplicationConfig;
+import io.modicon.taskapp.web.interaction.TaskFileDownloadResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -22,7 +23,8 @@ import static io.modicon.taskapp.infrastructure.exception.ApiException.exception
 public interface FileManagementService {
 
     String store(TaskEntity task, MultipartFile file);
-    String getFile(String taskName, MultipartFile file);
+
+    byte[] getFileBytes(FileData file);
 
     @Slf4j
     @Service
@@ -57,7 +59,10 @@ public interface FileManagementService {
 
                 String taskName = task.getId();
                 UUID fileId = UUID.randomUUID();
-                Path targetLocation = this.fileStorageLocation.resolve(taskName + separator + fileId + "_" + fileName);
+                Path dir = Paths.get(this.fileStorageLocation.toString() + separator + taskName);
+                Files.createDirectories(dir);
+
+                Path targetLocation = dir.resolve(fileId + "_" + fileName);
                 Files.copy(file.getInputStream(), targetLocation, StandardCopyOption.REPLACE_EXISTING);
                 log.info("Stored {}", targetLocation);
 
@@ -73,8 +78,15 @@ public interface FileManagementService {
         }
 
         @Override
-        public String getFile(String taskName, MultipartFile file) {
-            return null;
+        public byte[] getFileBytes(FileData file) {
+            String filePath = file.getFilePath();
+
+            try {
+                return Files.readAllBytes(new File(filePath).toPath());
+            } catch (IOException e) {
+                e.printStackTrace();
+                throw exception(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
+            }
         }
     }
 

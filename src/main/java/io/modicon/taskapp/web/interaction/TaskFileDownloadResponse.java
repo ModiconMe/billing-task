@@ -5,7 +5,7 @@ import lombok.Getter;
 
 @AllArgsConstructor
 @Getter
-public class TaskFileDownloadRequest {
-    private String taskName;
-    private String fileId;
+public class TaskFileDownloadResponse {
+    private byte[] file;
+    private String contentType;
 }
