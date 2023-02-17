@@ -10,10 +10,9 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
-public interface TaskRepository extends JpaRepository<TaskEntity, String> {
+public interface JpaTaskRepository extends JpaRepository<TaskEntity, String> {
     Optional<TaskEntity> findByIdAndCreator(String id, UserEntity creator);
     List<TaskEntity> findByTag(TagEntity tag);
     List<TaskEntity> findByTag(TagEntity tag, Pageable pageable);
-    void deleteByTag(TagEntity tag);
     List<TaskEntity> findByFinishDateGreaterThanEqual(LocalDate finishDate, Pageable pageable);
 }

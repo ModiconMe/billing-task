@@ -2,21 +2,15 @@ package io.modicon.taskapp.application.service;
 
 import io.modicon.taskapp.domain.model.FileData;
 import io.modicon.taskapp.domain.model.TaskEntity;
-import io.modicon.taskapp.domain.repository.FileDataRepository;
-import io.modicon.taskapp.domain.repository.TaskRepository;
+import io.modicon.taskapp.domain.repository.JpaTaskRepository;
 import io.modicon.taskapp.web.interaction.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.io.FileUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import static io.modicon.taskapp.infrastructure.exception.ApiException.exception;
@@ -38,7 +32,7 @@ public interface TaskFileService {
     class Base implements TaskFileService {
 
         private final FileManagementService fileManagementService;
-        private final TaskRepository taskRepository;
+        private final JpaTaskRepository taskRepository;
 
         @Override
         public TaskFileListResponse listFiles(String taskName) {

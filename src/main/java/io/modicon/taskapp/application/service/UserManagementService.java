@@ -2,7 +2,8 @@ package io.modicon.taskapp.application.service;
 
 import io.modicon.taskapp.application.mapper.UserDtoMapper;
 import io.modicon.taskapp.domain.model.UserEntity;
-import io.modicon.taskapp.domain.repository.UserRepository;
+import io.modicon.taskapp.domain.repository.JpaUserRepository;
+import io.modicon.taskapp.domain.repository.UserDataSource;
 import io.modicon.taskapp.infrastructure.security.jwt.JwtGeneration;
 import io.modicon.taskapp.web.interaction.UserLoginRequest;
 import io.modicon.taskapp.web.interaction.UserLoginResponse;
@@ -27,7 +28,7 @@ public interface UserManagementService {
     @Service
     class Base implements UserManagementService {
 
-        private final UserRepository userRepository;
+        private final UserDataSource userDataSource;
         private final PasswordEncoder passwordEncoder;
         private final UserDtoMapper userDtoMapper;
         private final JwtGeneration jwtGeneration;
@@ -35,14 +36,13 @@ public interface UserManagementService {
         @Override
         public UserRegisterResponse register(UserRegisterRequest request) {
             String username = request.getUsername();
-            if (userRepository.existsById(username))
-                throw exception(HttpStatus.BAD_REQUEST, "user with username [%s] is already exist", username);
+            userDataSource.existById(request.getUsername());
 
             UserEntity user = UserEntity.builder()
                     .username(username)
                     .password(passwordEncoder.encode(request.getPassword()))
                     .build();
-             userRepository.save(user);
+             userDataSource.save(user);
 
             return new UserRegisterResponse();
         }
@@ -50,8 +50,7 @@ public interface UserManagementService {
         @Override
         public UserLoginResponse login(UserLoginRequest request) {
             String username = request.getUsername();
-            UserEntity user = userRepository.findById(username)
-                    .orElseThrow(() -> exception(HttpStatus.NOT_FOUND, "user with username [%s] not found", username));
+            UserEntity user = userDataSource.findById(username);
 
             if (!passwordEncoder.matches(request.getPassword(), user.getPassword()))
                 throw exception(HttpStatus.FORBIDDEN, "wrong password");

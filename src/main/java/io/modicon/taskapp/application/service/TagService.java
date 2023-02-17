@@ -5,8 +5,8 @@ import io.modicon.taskapp.application.mapper.TaskDtoMapper;
 import io.modicon.taskapp.domain.model.PriorityType;
 import io.modicon.taskapp.domain.model.TagEntity;
 import io.modicon.taskapp.domain.model.TaskEntity;
-import io.modicon.taskapp.domain.repository.TagRepository;
-import io.modicon.taskapp.domain.repository.TaskRepository;
+import io.modicon.taskapp.domain.repository.JpaTagRepository;
+import io.modicon.taskapp.domain.repository.JpaTaskRepository;
 import io.modicon.taskapp.web.interaction.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
@@ -38,8 +38,8 @@ public interface TagService {
     @Service
     class Base implements TagService {
 
-        private final TagRepository tagRepository;
-        private final TaskRepository taskRepository;
+        private final JpaTagRepository tagRepository;
+        private final JpaTaskRepository taskRepository;
         private final TaskDtoMapper taskDtoMapper;
         private final TagDtoMapper tagDtoMapper;
         private final TaskFileService taskFileService;

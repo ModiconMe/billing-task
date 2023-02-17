@@ -5,8 +5,8 @@ import io.modicon.taskapp.domain.model.PriorityType;
 import io.modicon.taskapp.domain.model.TagEntity;
 import io.modicon.taskapp.domain.model.TaskEntity;
 import io.modicon.taskapp.domain.model.UserEntity;
-import io.modicon.taskapp.domain.repository.TagRepository;
-import io.modicon.taskapp.domain.repository.TaskRepository;
+import io.modicon.taskapp.domain.repository.JpaTagRepository;
+import io.modicon.taskapp.domain.repository.JpaTaskRepository;
 import io.modicon.taskapp.web.dto.TaskDto;
 import io.modicon.taskapp.web.interaction.*;
 import lombok.RequiredArgsConstructor;
@@ -16,12 +16,10 @@ import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.lang.reflect.Field;
 import java.time.LocalDate;
 import java.util.*;
-import java.util.stream.Collectors;
 
 import static io.modicon.taskapp.infrastructure.exception.ApiException.exception;
 
@@ -43,8 +41,8 @@ public interface TaskService {
     @Service
     class Base implements TaskService {
 
-        private final TaskRepository taskRepository;
-        private final TagRepository tagRepository;
+        private final JpaTaskRepository taskRepository;
+        private final JpaTagRepository tagRepository;
         private final TaskDtoMapper taskDtoMapper;
         private final TaskFileService taskFileService;
 

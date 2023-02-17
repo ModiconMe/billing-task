@@ -2,9 +2,8 @@ package io.modicon.taskapp.application.service;
 
 import io.modicon.taskapp.domain.model.FileData;
 import io.modicon.taskapp.domain.model.TaskEntity;
-import io.modicon.taskapp.domain.repository.TaskRepository;
+import io.modicon.taskapp.domain.repository.JpaTaskRepository;
 import io.modicon.taskapp.infrastructure.config.ApplicationConfig;
-import io.modicon.taskapp.web.interaction.TaskFileDownloadResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
 import org.springframework.http.HttpStatus;
@@ -34,9 +33,9 @@ public interface FileManagementService {
     class Base implements FileManagementService {
 
         private final Path fileStorageLocation;
-        private final TaskRepository taskRepository;
+        private final JpaTaskRepository taskRepository;
 
-        public Base(ApplicationConfig config, TaskRepository taskRepository) {
+        public Base(ApplicationConfig config, JpaTaskRepository taskRepository) {
             File homeDirectory = FileSystemView.getFileSystemView().getHomeDirectory();
             this.fileStorageLocation = Paths.get(homeDirectory + config.getUploadDir());
 

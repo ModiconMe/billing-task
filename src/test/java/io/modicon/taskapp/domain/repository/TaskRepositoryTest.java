@@ -21,7 +21,7 @@ import static org.junit.jupiter.api.Assertions.*;
 class TaskRepositoryTest {
 
     @Autowired
-    private TaskRepository taskRepository;
+    private JpaTaskRepository taskRepository;
 
     @Test
     void shouldFindByTagContaining_andSortByPriorityType() {
