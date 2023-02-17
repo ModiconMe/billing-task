@@ -12,7 +12,8 @@ import java.util.Optional;
 
 public interface TaskRepository extends JpaRepository<TaskEntity, String> {
     Optional<TaskEntity> findByIdAndCreator(String id, UserEntity creator);
-    List<TaskEntity> findByTagsContaining(TagEntity tag, Pageable pageable);
-    void deleteByTagsContaining(TagEntity tag);
+    List<TaskEntity> findByTag(TagEntity tag);
+    List<TaskEntity> findByTag(TagEntity tag, Pageable pageable);
+    void deleteByTag(TagEntity tag);
     List<TaskEntity> findByFinishDateGreaterThanEqual(LocalDate finishDate, Pageable pageable);
 }

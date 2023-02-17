@@ -46,6 +46,7 @@ public interface TaskService {
         private final TaskRepository taskRepository;
         private final TagRepository tagRepository;
         private final TaskDtoMapper taskDtoMapper;
+        private final TaskFileService taskFileService;
 
         @Override
         public TaskCreateResponse create(TaskCreateRequest request) {
@@ -55,13 +56,9 @@ public interface TaskService {
             if (request.getFinishDate().isBefore(LocalDate.now()))
                 throw exception(HttpStatus.BAD_REQUEST, "finish date cannot be earlier than today's date");
 
-            List<TagEntity> tags = new ArrayList<>();
-            if (request.getTags() != null) {
-                tags = request.getTags().stream()
-                        .map((t) -> tagRepository.findById(t).orElseGet(() -> new TagEntity(t, 0L)))
-                        .collect(Collectors.toList());
-                tags.forEach(TagEntity::addTask);
-            }
+            TagEntity tag = tagRepository
+                    .findById(request.getTag()).orElseGet(() -> new TagEntity(request.getTag(), 0L));
+            tag.addTask();
 
             PriorityType taskPriorityType;
             try {
@@ -77,7 +74,7 @@ public interface TaskService {
                     .createdAt(LocalDate.now())
                     .finishDate(request.getFinishDate())
                     .priorityType(taskPriorityType)
-                    .tags(tags)
+                    .tag(tag)
                     .creator(request.getUser())
                     .build();
 
@@ -94,12 +91,20 @@ public interface TaskService {
             if (request.getFinishDate().isBefore(LocalDate.now()))
                 throw exception(HttpStatus.BAD_REQUEST, "finish date cannot be earlier than today's date");
 
-            List<TagEntity> tags = new ArrayList<>();
-            if (request.getTags() != null) {
-                tags = request.getTags().stream()
-                        .map((t) -> tagRepository.findById(t).orElseGet(() -> new TagEntity(t, 0L)))
-                        .collect(Collectors.toList());
-                tags.forEach(TagEntity::addTask);
+            TagEntity tag = null;
+            if (request.getTag() != null) {
+                Optional<TagEntity> optionalTag = tagRepository.findById(request.getTag());
+                if (optionalTag.isPresent()) {
+                     tag = optionalTag.get();
+                     if (!task.getTag().equals(tag)) {
+                         tag.addTask();
+                         task.getTag().removeTask();
+                         tagRepository.save(task.getTag());
+                     }
+                } else {
+                    tag = new TagEntity(request.getTag(), 0L);
+                    tag.addTask();
+                }
             }
 
             PriorityType taskPriorityType = null;
@@ -117,7 +122,7 @@ public interface TaskService {
                     .description(request.getDescription() != null ? request.getDescription() : task.getDescription())
                     .finishDate(request.getFinishDate() != null ? request.getFinishDate() : task.getFinishDate())
                     .priorityType(taskPriorityType != null ? taskPriorityType : task.getPriorityType())
-                    .tags(!tags.isEmpty() ? tags : task.getTags())
+                    .tag(tag != null ? tag : task.getTag())
                     .build();
 
             taskRepository.save(task);
@@ -130,7 +135,11 @@ public interface TaskService {
             TaskEntity task = taskRepository.findByIdAndCreator(id, user)
                     .orElseThrow(() -> exception(HttpStatus.NOT_FOUND, "task not found..."));
 
+            task.getTag().removeTask();
+            tagRepository.delete(task.getTag());
+
             taskRepository.delete(task);
+            taskFileService.deleteTaskFiles(id);
 
             return new TaskDeleteResponse(task.getId());
         }

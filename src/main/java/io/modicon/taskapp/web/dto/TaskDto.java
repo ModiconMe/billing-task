@@ -12,7 +12,7 @@ public record TaskDto(
         String description,
         LocalDate createdAt,
         LocalDate finishDate,
-        Set<String> tags,
+        String tag,
         UserDto creator
 ) {
 }

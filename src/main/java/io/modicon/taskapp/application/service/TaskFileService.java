@@ -7,6 +7,7 @@ import io.modicon.taskapp.domain.repository.TaskRepository;
 import io.modicon.taskapp.web.interaction.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.io.FileUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -15,6 +16,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import static io.modicon.taskapp.infrastructure.exception.ApiException.exception;
@@ -26,6 +28,8 @@ public interface TaskFileService {
     TaskFileUploadResponse upload(TaskFileUploadRequest request);
 
     TaskFileDownloadResponse download(TaskFileDownloadRequest request);
+
+    void deleteTaskFiles(String taskName);
 
     @Slf4j
     @Transactional
@@ -64,6 +68,21 @@ public interface TaskFileService {
                     .orElseThrow(() -> exception(HttpStatus.NOT_FOUND, "file not found..."));
 
             return new TaskFileDownloadResponse(fileManagementService.getFileBytes(file), file.getType());
+        }
+
+        @Override
+        public void deleteTaskFiles(String taskName) {
+//            File file = new File(taskName);
+//            File[] contents = file.listFiles();
+//            if (contents != null) {
+//                for (File f : contents) {
+//                    if (! Files.isSymbolicLink(f.toPath())) {
+//                        deleteTaskFiles(f.getName());
+//                    }
+//                }
+//            }
+//            file.delete();
+            fileManagementService.deleteFileDirectory(taskName);
         }
     }
 }

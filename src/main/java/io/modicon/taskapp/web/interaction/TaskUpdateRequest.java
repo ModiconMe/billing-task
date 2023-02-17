@@ -23,5 +23,5 @@ public class TaskUpdateRequest {
     private String priorityType;
     private String description;
     private LocalDate finishDate;
-    private Set<String> tags;
+    private String tag;
 }

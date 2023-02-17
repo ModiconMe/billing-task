@@ -24,4 +24,7 @@ public class TagEntity {
     public void addTask() {
         taskCount++;
     }
+    public void removeTask() {
+        taskCount--;
+    }
 }

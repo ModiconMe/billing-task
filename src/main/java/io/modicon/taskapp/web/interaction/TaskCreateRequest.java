@@ -34,5 +34,6 @@ public class TaskCreateRequest {
     private String description;
     @NotNull(message = "finish date type must be not empty")
     private LocalDate finishDate;
-    private Set<String> tags;
+    @NotNull(message = "tag must be not empty")
+    private String tag;
 }

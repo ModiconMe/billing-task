@@ -34,19 +34,13 @@ public class TaskEntity {
     @Column(nullable = false)
     private LocalDate finishDate;
 
-    @Singular
-    @ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
-    @JoinTable(
-            name = "task_tags",
-            joinColumns = @JoinColumn(name = "task_id"),
-            inverseJoinColumns = @JoinColumn(name = "tag_id")
-    )
-    private Set<TagEntity> tags;
+    @ManyToOne(cascade = CascadeType.MERGE)
+    private TagEntity tag;
 
     @ManyToOne(cascade = CascadeType.MERGE)
     private UserEntity creator;
 
     @Singular
-    @OneToMany(cascade = CascadeType.MERGE)
+    @OneToMany(cascade = {CascadeType.MERGE, CascadeType.REMOVE})
     private List<FileData> files;
 }

@@ -6,6 +6,7 @@ import io.modicon.taskapp.domain.repository.TaskRepository;
 import io.modicon.taskapp.infrastructure.config.ApplicationConfig;
 import io.modicon.taskapp.web.interaction.TaskFileDownloadResponse;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.io.FileUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
@@ -25,6 +26,8 @@ public interface FileManagementService {
     String store(TaskEntity task, MultipartFile file);
 
     byte[] getFileBytes(FileData file);
+
+    void deleteFileDirectory(String dirName);
 
     @Slf4j
     @Service
@@ -86,6 +89,17 @@ public interface FileManagementService {
             } catch (IOException e) {
                 e.printStackTrace();
                 throw exception(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
+            }
+        }
+
+        @Override
+        public void deleteFileDirectory(String dirName) {
+            try {
+                String separator = FileSystems.getDefault().getSeparator();
+                log.info("deleting dir");
+                FileUtils.deleteDirectory(new File(this.fileStorageLocation.toString() + separator + dirName));
+            } catch (IOException e) {
+                throw new RuntimeException(e);
             }
         }
     }

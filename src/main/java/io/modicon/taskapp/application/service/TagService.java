@@ -42,6 +42,7 @@ public interface TagService {
         private final TaskRepository taskRepository;
         private final TaskDtoMapper taskDtoMapper;
         private final TagDtoMapper tagDtoMapper;
+        private final TaskFileService taskFileService;
 
         @Transactional(readOnly = true)
         @Override
@@ -55,11 +56,11 @@ public interface TagService {
                     .findFirst();
 
             List<TaskEntity> tasks;
-            tasks = fieldToSort.map(field -> taskRepository.findByTagsContaining(tag, PageRequest.of(
+            tasks = fieldToSort.map(field -> taskRepository.findByTag(tag, PageRequest.of(
                             Integer.parseInt(page),
                             Integer.parseInt(limit),
                             Sort.by(field.getName()))))
-                    .orElseGet(() -> taskRepository.findByTagsContaining(tag, PageRequest.of(
+                    .orElseGet(() -> taskRepository.findByTag(tag, PageRequest.of(
                             Integer.parseInt(page),
                             Integer.parseInt(limit))
                     ));
@@ -106,7 +107,9 @@ public interface TagService {
             TagEntity tag = tagRepository.findById(tagName)
                     .orElseThrow(() -> exception(HttpStatus.NOT_FOUND, "tag [%s] not found", tagName));
 
-            taskRepository.deleteByTagsContaining(tag);
+            List<TaskEntity> tasks = taskRepository.findByTag(tag);
+            tasks.forEach(t -> taskFileService.deleteTaskFiles(t.getId()));
+            taskRepository.deleteAll(tasks);
             tagRepository.delete(tag);
 
             return new TagDeleteResponse(tagDtoMapper.apply(tag));
