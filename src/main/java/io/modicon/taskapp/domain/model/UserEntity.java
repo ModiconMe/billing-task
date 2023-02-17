@@ -26,7 +26,7 @@ public class UserEntity implements UserDetails {
 
     @Singular
     @OneToMany(
-            cascade = {CascadeType.PERSIST, CascadeType.REMOVE},
+            cascade = {CascadeType.REMOVE, CascadeType.MERGE},
             orphanRemoval = true
     )
     private List<TaskEntity> tasks;

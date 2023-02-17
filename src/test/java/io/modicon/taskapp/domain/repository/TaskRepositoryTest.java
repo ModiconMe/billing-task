@@ -3,6 +3,7 @@ package io.modicon.taskapp.domain.repository;
 import io.modicon.taskapp.domain.model.PriorityType;
 import io.modicon.taskapp.domain.model.TagEntity;
 import io.modicon.taskapp.domain.model.TaskEntity;
+import io.modicon.taskapp.domain.model.UserEntity;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
@@ -23,40 +24,75 @@ class TaskRepositoryTest {
     @Autowired
     private JpaTaskRepository taskRepository;
 
-    @Test
-    void shouldFindByTagContaining_andSortByPriorityType() {
-        // given
-        TagEntity tag1 = new TagEntity("tag1", 0L);
-        TagEntity tag2 = new TagEntity("tag2", 1L);
-        TagEntity tag3 = new TagEntity("tag3", 0L);
-        TaskEntity importantTask = TaskEntity.builder()
+    @Autowired
+    private JpaUserRepository userRepository;
+
+    private final UserEntity creator;
+    private final TaskEntity urgentTask;
+    private final TaskEntity importantTask;
+    private final TaskEntity commonTask;
+    private final TagEntity tag;
+    private final TagEntity notExistedTag;
+
+    {
+        creator = UserEntity.builder()
+                .username("username")
+                .password("password")
+                .build();
+        tag = new TagEntity("tag", 1L);
+        notExistedTag = new TagEntity("notExistedTag", 1L);
+        importantTask = TaskEntity.builder()
                 .id("taskid1")
-                .tag(tag1)
-                .tag(tag2)
-                .tag(tag3)
+                .tag(tag)
                 .description("description")
                 .priorityType(PriorityType.IMPORTANT)
                 .createdAt(LocalDate.now())
                 .finishDate(LocalDate.now())
+                .creator(creator)
                 .build();
-        TaskEntity commonTask = TaskEntity.builder()
+        commonTask = TaskEntity.builder()
                 .id("taskid2")
-                .tag(tag1)
-                .tag(tag2)
+                .tag(tag)
                 .description("description")
                 .priorityType(PriorityType.COMMON)
                 .createdAt(LocalDate.now())
                 .finishDate(LocalDate.now())
                 .build();
-        TaskEntity urgentTask = TaskEntity.builder()
+        urgentTask = TaskEntity.builder()
                 .id("taskid3")
-                .tag(tag2)
+                .tag(tag)
                 .description("description")
                 .priorityType(PriorityType.URGENT)
                 .createdAt(LocalDate.now())
                 .finishDate(LocalDate.now())
+                .creator(creator)
                 .build();
+    }
 
+    @Test
+    void shouldFindByIdAndCreator() {
+        taskRepository.save(importantTask);
+        userRepository.save(creator);
+
+        Optional<TaskEntity> expected = taskRepository.findByIdAndCreator(importantTask.getId(), creator);
+
+        assertTrue(expected.isPresent());
+        assertEquals(expected.get(), importantTask);
+    }
+
+    @Test
+    void shouldNotFindByIdAndCreator() {
+        taskRepository.save(importantTask);
+        userRepository.save(creator);
+
+        Optional<TaskEntity> expected = taskRepository.findByIdAndCreator(commonTask.getId(), creator);
+
+        assertTrue(expected.isEmpty());
+    }
+
+    @Test
+    void shouldFindByTag_andSortByPriorityType() {
+        // given
         taskRepository.saveAll(List.of(importantTask, commonTask, urgentTask));
 
         Optional<Field> fieldToSort = Arrays
@@ -66,12 +102,53 @@ class TaskRepositoryTest {
         assertTrue(fieldToSort.isPresent());
 
         // when
-        List<TaskEntity> expected = taskRepository.findByTagsContaining(tag2,
+        List<TaskEntity> expected = taskRepository.findByTag(tag,
                 PageRequest.of(0, 10, Sort.by(fieldToSort.get().getName())));
 
         // then
         assertEquals(expected.get(0), urgentTask);
         assertEquals(expected.get(1), importantTask);
         assertEquals(expected.get(2), commonTask);
+    }
+
+    @Test
+    void shouldNotFindByTag_sorted() {
+        // given
+        Optional<Field> fieldToSort = Arrays
+                .stream(TaskEntity.class.getDeclaredFields())
+                .filter(f -> f.getType().equals(PriorityType.class))
+                .findFirst();
+        assertTrue(fieldToSort.isPresent());
+
+        // when
+        List<TaskEntity> expected = taskRepository.findByTag(tag,
+                PageRequest.of(0, 10, Sort.by(fieldToSort.get().getName())));
+
+        // then
+        assertTrue(expected.isEmpty());
+    }
+
+    @Test
+    void shouldFindByTag() {
+        // given
+        taskRepository.saveAll(List.of(importantTask, commonTask, urgentTask));
+
+        // when
+        List<TaskEntity> expected = taskRepository.findByTag(tag);
+
+        // then
+        assertEquals(expected.get(0), importantTask);
+        assertEquals(expected.get(1), commonTask);
+        assertEquals(expected.get(2), urgentTask);
+    }
+
+    @Test
+    void shouldNotFindByTag() {
+        // given
+        // when
+        List<TaskEntity> expected = taskRepository.findByTag(tag);
+
+        // then
+        assertTrue(expected.isEmpty());
     }
 }
