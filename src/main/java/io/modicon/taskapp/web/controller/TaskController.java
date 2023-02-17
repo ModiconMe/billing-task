@@ -9,6 +9,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 public interface TaskController {
 
@@ -38,6 +39,9 @@ public interface TaskController {
     @GetMapping
     TaskGetGroupByPriorityType get(@RequestParam(value = "page", defaultValue = "0") String page,
                                    @RequestParam(value = "limit", defaultValue = "20") String limit);
+
+    @PostMapping("/uploadFile/{taskName}")
+    TaskFileUploadResponse upload(@RequestParam(value = "file") MultipartFile file, @PathVariable String taskName);
 
     @RequiredArgsConstructor
     @RestController
@@ -70,6 +74,11 @@ public interface TaskController {
         @Override
         public TaskGetGroupByPriorityType get(String page, String limit) {
             return taskService.get(page, limit);
+        }
+
+        @Override
+        public TaskFileUploadResponse upload(MultipartFile file, String taskName) {
+            return taskService.upload(new TaskFileUploadRequest(taskName, file));
         }
     }
 }

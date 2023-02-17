@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Set;
 
 @Builder(toBuilder = true)
@@ -44,4 +45,8 @@ public class TaskEntity {
 
     @ManyToOne(cascade = CascadeType.MERGE)
     private UserEntity creator;
+
+    @Singular
+    @OneToMany(cascade = CascadeType.MERGE)
+    private List<FileData> files;
 }
