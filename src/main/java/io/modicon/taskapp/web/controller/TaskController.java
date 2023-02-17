@@ -29,11 +29,14 @@ public interface TaskController {
     TaskDeleteResponse delete(@PathVariable String id,
                               @AuthenticationPrincipal UserEntity user);
 
-    @GetMapping
+    @GetMapping("/byDate")
     TaskGetByDateResponse get(@RequestParam(value = "finish_date", required = false) String date,
                               @RequestParam(value = "page", defaultValue = "0") String page,
-                              @RequestParam(value = "limit", defaultValue = "20") String limit,
-                              @AuthenticationPrincipal UserEntity user);
+                              @RequestParam(value = "limit", defaultValue = "20") String limit);
+
+    @GetMapping
+    TaskGetGroupByPriorityType get(@RequestParam(value = "page", defaultValue = "0") String page,
+                                   @RequestParam(value = "limit", defaultValue = "20") String limit);
 
     @RequiredArgsConstructor
     @RestController
@@ -58,8 +61,13 @@ public interface TaskController {
         }
 
         @Override
-        public TaskGetByDateResponse get(String date, String page, String limit, UserEntity user) {
-            return taskService.getByDate(date, page, limit);
+        public TaskGetByDateResponse get(String date, String page, String limit) {
+            return taskService.get(date, page, limit);
+        }
+
+        @Override
+        public TaskGetGroupByPriorityType get(String page, String limit) {
+            return taskService.get(page, limit);
         }
     }
 }

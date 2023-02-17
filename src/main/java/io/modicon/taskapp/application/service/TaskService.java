@@ -7,6 +7,7 @@ import io.modicon.taskapp.domain.model.TaskEntity;
 import io.modicon.taskapp.domain.model.UserEntity;
 import io.modicon.taskapp.domain.repository.TagRepository;
 import io.modicon.taskapp.domain.repository.TaskRepository;
+import io.modicon.taskapp.web.dto.TaskDto;
 import io.modicon.taskapp.web.interaction.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
@@ -17,10 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.lang.reflect.Field;
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static io.modicon.taskapp.infrastructure.exception.ApiException.exception;
@@ -33,7 +31,9 @@ public interface TaskService {
 
     TaskDeleteResponse delete(String id, UserEntity user);
 
-    TaskGetByDateResponse getByDate(String date, String page, String limit);
+    TaskGetByDateResponse get(String date, String page, String limit);
+
+    TaskGetGroupByPriorityType get(String page, String limit);
 
     @Transactional
     @RequiredArgsConstructor
@@ -106,7 +106,7 @@ public interface TaskService {
                 } catch (Exception e) {
                     e.printStackTrace();
                     throw exception(HttpStatus.BAD_REQUEST,
-                            "wrong priority type for task, it only supports %s", Arrays.toString( PriorityType.values()));
+                            "wrong priority type for task, it only supports %s", Arrays.toString(PriorityType.values()));
                 }
             }
 
@@ -134,7 +134,7 @@ public interface TaskService {
 
         @Transactional(readOnly = true)
         @Override
-        public TaskGetByDateResponse getByDate(String date, String page, String limit) {
+        public TaskGetByDateResponse get(String date, String page, String limit) {
             LocalDate parsedDate = LocalDate.parse(date);
 
             Optional<Field> fieldToSort = Arrays
@@ -143,21 +143,45 @@ public interface TaskService {
                     .findFirst();
 
             List<TaskEntity> tasks;
-            if (fieldToSort.isPresent())
-                tasks = taskRepository.findByFinishDateGreaterThanEqual(parsedDate,
-                        PageRequest.of(
-                                Integer.parseInt(page),
-                                Integer.parseInt(limit),
-                                Sort.by(fieldToSort.get().getName()))
-                );
-            else
-                tasks = taskRepository.findByFinishDateGreaterThanEqual(parsedDate,
-                        PageRequest.of(
-                                Integer.parseInt(page),
-                                Integer.parseInt(limit))
-                );
+            tasks = fieldToSort.map(field -> taskRepository.findAll(PageRequest.of(
+                            Integer.parseInt(page),
+                            Integer.parseInt(limit),
+                            Sort.by(field.getName()))).getContent())
+                    .orElseGet(() -> taskRepository.findAll(PageRequest.of(
+                            Integer.parseInt(page),
+                            Integer.parseInt(limit))
+                    ).getContent());
 
             return new TaskGetByDateResponse(tasks.stream().map(taskDtoMapper).toList());
+        }
+
+        @Override
+        public TaskGetGroupByPriorityType get(String page, String limit) {
+            Optional<Field> fieldToSort = Arrays
+                    .stream(TaskEntity.class.getDeclaredFields())
+                    .filter(f -> f.getType().equals(PriorityType.class))
+                    .findFirst();
+
+            List<TaskEntity> tasks;
+            tasks = fieldToSort.map(field -> taskRepository.findAll(PageRequest.of(
+                            Integer.parseInt(page),
+                            Integer.parseInt(limit),
+                            Sort.by(field.getName()))).getContent())
+                    .orElseGet(() -> taskRepository.findAll(PageRequest.of(
+                            Integer.parseInt(page),
+                            Integer.parseInt(limit))
+                    ).getContent());
+
+            Map<PriorityType, List<TaskDto>> priorityTaskMap = new LinkedHashMap<>();
+            Arrays.stream(PriorityType.values()).forEach(p -> {
+                List<TaskDto> sortedTask = tasks.stream()
+                        .filter(t -> t.getPriorityType().equals(p))
+                        .map(taskDtoMapper).toList();
+                if (!sortedTask.isEmpty())
+                    priorityTaskMap.put(p, sortedTask);
+            });
+
+            return new TaskGetGroupByPriorityType(priorityTaskMap);
         }
     }
 }

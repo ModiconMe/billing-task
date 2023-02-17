@@ -27,7 +27,7 @@ public interface AuthUserController {
     @RequiredArgsConstructor
     @RestController
     @RequestMapping(BASE_URL_V1)
-    class Base implements AuthUserController {
+    class AuthControllerV1 implements AuthUserController {
 
         private final UserManagementService userManagementService;
 
