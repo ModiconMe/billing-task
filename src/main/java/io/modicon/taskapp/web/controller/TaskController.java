@@ -6,9 +6,7 @@ import io.modicon.taskapp.web.interaction.*;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 public interface TaskController {
@@ -31,9 +29,9 @@ public interface TaskController {
     TaskDeleteResponse delete(@PathVariable String id,
                               @AuthenticationPrincipal UserEntity user);
 
-    @GetMapping("/byDate")
-    TaskGetByDateResponse getByDate(@RequestParam(value = "finish_date", required = false) String date,
-                                    @AuthenticationPrincipal UserEntity user);
+    @GetMapping
+    TaskGetByDateResponse get(@RequestParam(value = "finish_date", required = false) String date,
+                              @AuthenticationPrincipal UserEntity user);
 
     @RequiredArgsConstructor
     @RestController
@@ -58,7 +56,7 @@ public interface TaskController {
         }
 
         @Override
-        public TaskGetByDateResponse getByDate(String date, UserEntity user) {
+        public TaskGetByDateResponse get(String date, UserEntity user) {
             return taskService.getByDate(date);
         }
     }

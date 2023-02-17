@@ -2,22 +2,28 @@ package io.modicon.taskapp.application.service;
 
 import io.modicon.taskapp.application.mapper.TagDtoMapper;
 import io.modicon.taskapp.application.mapper.TaskDtoMapper;
+import io.modicon.taskapp.domain.model.PriorityType;
 import io.modicon.taskapp.domain.model.TagEntity;
 import io.modicon.taskapp.domain.model.TaskEntity;
 import io.modicon.taskapp.domain.repository.TagRepository;
 import io.modicon.taskapp.domain.repository.TaskRepository;
 import io.modicon.taskapp.web.interaction.*;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.lang.reflect.Field;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 
 import static io.modicon.taskapp.infrastructure.exception.ApiException.exception;
 
 public interface TagService {
-    TagGetByIdWithTaskResponse getTagWithTasks(String tagName);
+    TagGetByIdWithTaskResponse getTagWithTasks(String tagName, String page, String limit);
 
     TagGetAllWithTaskExistedResponse getAllTagsWithExistedTasks();
 
@@ -39,11 +45,29 @@ public interface TagService {
 
         @Transactional(readOnly = true)
         @Override
-        public TagGetByIdWithTaskResponse getTagWithTasks(String tagName) {
+        public TagGetByIdWithTaskResponse getTagWithTasks(String tagName, String page, String limit) {
             TagEntity tag = tagRepository.findById(tagName)
                     .orElseThrow(() -> exception(HttpStatus.NOT_FOUND, "tag [%s] not found", tagName));
 
-            List<TaskEntity> tasks = taskRepository.findByTagsContaining(tag);
+            Optional<Field> fieldToSort = Arrays
+                    .stream(TaskEntity.class.getDeclaredFields())
+                    .filter(f -> f.getType().equals(PriorityType.class))
+                    .findFirst();
+
+            List<TaskEntity> tasks;
+            if (fieldToSort.isPresent())
+                tasks = taskRepository.findByTagsContaining(tag,
+                        PageRequest.of(
+                                Integer.parseInt(page),
+                                Integer.parseInt(limit),
+                                Sort.by(fieldToSort.get().getName()).descending())
+                );
+            else
+                tasks = taskRepository.findByTagsContaining(tag,
+                        PageRequest.of(
+                                Integer.parseInt(page),
+                                Integer.parseInt(limit))
+                );
 
             return new TagGetByIdWithTaskResponse(tagDtoMapper.apply(tag), tasks.stream().map(taskDtoMapper).toList());
         }

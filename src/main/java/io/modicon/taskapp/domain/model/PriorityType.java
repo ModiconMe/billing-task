@@ -1,5 +1,5 @@
 package io.modicon.taskapp.domain.model;
 
 public enum PriorityType {
-    COMMON, IMPORTANT, URGENT
+    URGENT, IMPORTANT, COMMON
 }

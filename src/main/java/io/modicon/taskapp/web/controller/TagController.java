@@ -12,7 +12,9 @@ public interface TagController {
     String BASE_URL_V1 = "api/v1/tags";
 
     @GetMapping("/{tagName}")
-    TagGetByIdWithTaskResponse getTagWithTasks(@PathVariable String tagName);
+    TagGetByIdWithTaskResponse getTagWithTasks(@PathVariable String tagName,
+                                               @RequestParam(value = "page", defaultValue = "0") String page,
+                                               @RequestParam(value = "limit", defaultValue = "20") String limit);
 
     @GetMapping
     TagGetAllWithTaskExistedResponse getAllTagsWithExistedTasks();
@@ -37,8 +39,8 @@ public interface TagController {
         private final TagService tagService;
 
         @Override
-        public TagGetByIdWithTaskResponse getTagWithTasks(String tagName) {
-            return tagService.getTagWithTasks(tagName);
+        public TagGetByIdWithTaskResponse getTagWithTasks(String tagName, String page, String limit) {
+            return tagService.getTagWithTasks(tagName, page, limit);
         }
 
         @Override

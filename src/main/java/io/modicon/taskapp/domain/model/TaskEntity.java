@@ -20,7 +20,7 @@ public class TaskEntity {
     @Id
     private String id;
 
-    @Enumerated(value = EnumType.STRING)
+    @Enumerated(value = EnumType.ORDINAL)
     @Column(nullable = false)
     private PriorityType priorityType;
 
