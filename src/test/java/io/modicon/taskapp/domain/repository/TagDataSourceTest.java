@@ -47,7 +47,7 @@ class TagDataSourceTest {
                 .username("username")
                 .password("password")
                 .build();
-        tag = new TagEntity("tag", 1L);
+        tag = new TagEntity("tag", 0L);
         importantTask = TaskEntity.builder()
                 .id("taskid1")
                 .tag(tag)
@@ -153,5 +153,53 @@ class TagDataSourceTest {
 
         // then
         verify(jpaTagRepository, times(1)).delete(tag);
+    }
+
+    @Test
+    void shouldSupplyTag_whenTagExist() {
+        // given
+        when(jpaTagRepository.findById(tag.getTagName())).thenReturn(Optional.of(tag));
+
+        // when
+        TagEntity actual = readUnderTest.supplyTag(tag.getTagName());
+
+        // then
+        assertEquals(tag, actual);
+    }
+
+    @Test
+    void shouldSupplyTag_whenTagNotExist() {
+        // given
+        when(jpaTagRepository.findById(tag.getTagName())).thenReturn(Optional.empty());
+
+        // when
+        TagEntity actual = readUnderTest.supplyTag(tag.getTagName());
+
+        // then
+        assertEquals(tag, actual);
+    }
+
+    @Test
+    void shouldTryToFindTag_whenTagExist() {
+        // given
+        when(jpaTagRepository.findById(tag.getTagName())).thenReturn(Optional.of(tag));
+
+        // when
+        Optional<TagEntity> actual = readUnderTest.tryToFindTag(tag.getTagName());
+
+        // then
+        assertEquals(Optional.of(tag), actual);
+    }
+
+    @Test
+    void shouldTryToFindTag_whenTagNotExist() {
+        // given
+        when(jpaTagRepository.findById(tag.getTagName())).thenReturn(Optional.empty());
+
+        // when
+        Optional<TagEntity> actual = readUnderTest.tryToFindTag(tag.getTagName());
+
+        // then
+        assertEquals(Optional.empty(), actual);
     }
 }

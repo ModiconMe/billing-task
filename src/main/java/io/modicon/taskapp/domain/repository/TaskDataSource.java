@@ -15,18 +15,26 @@ import static io.modicon.taskapp.infrastructure.exception.ApiException.exception
 
 public interface TaskDataSource {
 
-    interface Read {
-        TaskEntity findByIdAndCreator(String id, UserEntity creator);
+    interface ReadAdmin {
+        TaskEntity findById(String id);
 
+        List<TaskEntity> findCurrentTask(LocalDate finishDate, String page, String limit);
+
+        List<TaskEntity> findAllTasks(String page, String limit);
+    }
+
+    interface ReadUser {
         void validateExistByIdAndCreator(String id, UserEntity creator);
+
+        TaskEntity findByIdAndCreator(String id, UserEntity creator);
 
         List<TaskEntity> findByTag(TagEntity tag);
 
         List<TaskEntity> findByTag(TagEntity tag, String page, String limit);
 
-        List<TaskEntity> findByFinishDateGreaterThanEqual(LocalDate finishDate, String page, String limit);
+        List<TaskEntity> findCurrentTask(LocalDate finishDate, String page, String limit, UserEntity creator);
 
-        List<TaskEntity> findAll(String page, String limit);
+        List<TaskEntity> findAllUserTasks(String page, String limit, UserEntity creator);
     }
 
     interface Write {
@@ -40,7 +48,7 @@ public interface TaskDataSource {
     @Transactional(readOnly = true)
     @RequiredArgsConstructor
     @Service
-    class JpaReadTaskDataSource implements TaskDataSource.Read {
+    class JpaReadUserTaskDataSource implements ReadUser {
 
         private final JpaTaskRepository jpaTaskRepository;
         private final TaskSortingDispatcher taskSortingDispatcher;
@@ -68,13 +76,39 @@ public interface TaskDataSource {
         }
 
         @Override
-        public List<TaskEntity> findByFinishDateGreaterThanEqual(LocalDate finishDate, String page, String limit) {
+        public List<TaskEntity> findCurrentTask(LocalDate finishDate, String page, String limit, UserEntity creator) {
+            return jpaTaskRepository.findByFinishDateGreaterThanEqualAndCreator(finishDate, creator,
+                    taskSortingDispatcher.getPage(page, limit));
+        }
+
+        @Override
+        public List<TaskEntity> findAllUserTasks(String page, String limit, UserEntity creator) {
+            return jpaTaskRepository.findAllByCreator(creator, taskSortingDispatcher.getPage(page, limit));
+        }
+    }
+
+    @Transactional(readOnly = true)
+    @RequiredArgsConstructor
+    @Service
+    class JpaReadAdminTaskDataSource implements ReadAdmin {
+
+        private final JpaTaskRepository jpaTaskRepository;
+        private final TaskSortingDispatcher taskSortingDispatcher;
+
+        @Override
+        public TaskEntity findById(String id) {
+            return jpaTaskRepository.findById(id)
+                    .orElseThrow(() -> exception(HttpStatus.NOT_FOUND, "task not found..."));
+        }
+
+        @Override
+        public List<TaskEntity> findCurrentTask(LocalDate finishDate, String page, String limit) {
             return jpaTaskRepository.findByFinishDateGreaterThanEqual(finishDate,
                     taskSortingDispatcher.getPage(page, limit));
         }
 
         @Override
-        public List<TaskEntity> findAll(String page, String limit) {
+        public List<TaskEntity> findAllTasks(String page, String limit) {
             return jpaTaskRepository.findAll(taskSortingDispatcher.getPage(page, limit)).getContent();
         }
     }

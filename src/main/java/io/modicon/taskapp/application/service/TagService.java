@@ -2,27 +2,16 @@ package io.modicon.taskapp.application.service;
 
 import io.modicon.taskapp.application.mapper.TagDtoMapper;
 import io.modicon.taskapp.application.mapper.TaskDtoMapper;
-import io.modicon.taskapp.domain.model.PriorityType;
 import io.modicon.taskapp.domain.model.TagEntity;
 import io.modicon.taskapp.domain.model.TaskEntity;
-import io.modicon.taskapp.domain.repository.JpaTagRepository;
-import io.modicon.taskapp.domain.repository.JpaTaskRepository;
 import io.modicon.taskapp.domain.repository.TagDataSource;
 import io.modicon.taskapp.domain.repository.TaskDataSource;
 import io.modicon.taskapp.web.interaction.*;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Sort;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.lang.reflect.Field;
-import java.util.Arrays;
 import java.util.List;
-import java.util.Optional;
-
-import static io.modicon.taskapp.infrastructure.exception.ApiException.exception;
 
 public interface TagService {
     TagGetByIdWithTaskResponse getTagWithTasks(String tagName, String page, String limit);
@@ -42,7 +31,7 @@ public interface TagService {
 
         private final TagDataSource.Read readTagDataSource;
         private final TagDataSource.Write writeTagDataSource;
-        private final TaskDataSource.Read readTaskDataSource;
+        private final TaskDataSource.ReadUser readTaskDataSource;
         private final TaskDataSource.Write writeTaskDataSource;
         private final TaskFileService taskFileService;
 

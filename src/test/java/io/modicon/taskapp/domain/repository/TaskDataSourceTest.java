@@ -30,7 +30,8 @@ import static org.mockito.Mockito.*;
 class TaskDataSourceTest {
 
     private TaskDataSource.Write writeUnderTest;
-    private TaskDataSource.Read readUnderTest;
+    private TaskDataSource.ReadUser readUserUnderTest;
+    private TaskDataSource.ReadAdmin readAdminUnderTest;
 
     @Mock
     private JpaTaskRepository jpaTaskRepository;
@@ -40,7 +41,8 @@ class TaskDataSourceTest {
     @BeforeEach
     void setUp() {
         writeUnderTest = new TaskDataSource.JpaWriteTaskDataSource(jpaTaskRepository);
-        readUnderTest = new TaskDataSource.JpaReadTaskDataSource(jpaTaskRepository, taskSortingDispatcher);
+        readUserUnderTest = new TaskDataSource.JpaReadUserTaskDataSource(jpaTaskRepository, taskSortingDispatcher);
+        readAdminUnderTest = new TaskDataSource.JpaReadAdminTaskDataSource(jpaTaskRepository, taskSortingDispatcher);
     }
 
     private final UserEntity creator;
@@ -89,7 +91,7 @@ class TaskDataSourceTest {
         when(jpaTaskRepository.findByIdAndCreator(commonTask.getId(), creator)).thenReturn(Optional.of(commonTask));
 
         // when
-        TaskEntity actual = readUnderTest.findByIdAndCreator(commonTask.getId(), creator);
+        TaskEntity actual = readUserUnderTest.findByIdAndCreator(commonTask.getId(), creator);
 
         // then
         assertEquals(commonTask, actual);
@@ -101,7 +103,7 @@ class TaskDataSourceTest {
         when(jpaTaskRepository.findByIdAndCreator(commonTask.getId(), creator)).thenReturn(Optional.empty());
 
         // when
-        ApiException actual = catchThrowableOfType(() -> readUnderTest.findByIdAndCreator(commonTask.getId(), creator), ApiException.class);
+        ApiException actual = catchThrowableOfType(() -> readUserUnderTest.findByIdAndCreator(commonTask.getId(), creator), ApiException.class);
 
         // then
         assertEquals(exception(HttpStatus.NOT_FOUND, "task not found..."), actual);
@@ -113,7 +115,7 @@ class TaskDataSourceTest {
         when(jpaTaskRepository.findByIdAndCreator(commonTask.getId(), creator)).thenReturn(Optional.of(commonTask));
 
         // when
-        ApiException actual = catchThrowableOfType(() -> readUnderTest.validateExistByIdAndCreator(commonTask.getId(), creator), ApiException.class);
+        ApiException actual = catchThrowableOfType(() -> readUserUnderTest.validateExistByIdAndCreator(commonTask.getId(), creator), ApiException.class);
 
         // then
         assertEquals(exception(HttpStatus.BAD_REQUEST, "user with username [%s] is already exist", creator.getUsername()), actual);
@@ -126,7 +128,7 @@ class TaskDataSourceTest {
 
         // when
         // then
-        assertDoesNotThrow(() -> readUnderTest.validateExistByIdAndCreator(commonTask.getId(), creator));
+        assertDoesNotThrow(() -> readUserUnderTest.validateExistByIdAndCreator(commonTask.getId(), creator));
     }
 
     @Test
@@ -135,7 +137,7 @@ class TaskDataSourceTest {
         when(jpaTaskRepository.findByTag(tag)).thenReturn(List.of(commonTask));
 
         // when
-        List<TaskEntity> actual = readUnderTest.findByTag(tag);
+        List<TaskEntity> actual = readUserUnderTest.findByTag(tag);
 
         // then
         assertEquals(List.of(commonTask), actual);
@@ -154,7 +156,7 @@ class TaskDataSourceTest {
         when(jpaTaskRepository.findByTag(tag, pageable)).thenReturn(List.of(commonTask));
 
         // when
-        List<TaskEntity> actual = readUnderTest.findByTag(tag, "0", "1");
+        List<TaskEntity> actual = readUserUnderTest.findByTag(tag, "0", "1");
 
         // then
         assertEquals(List.of(commonTask), actual);
@@ -169,14 +171,14 @@ class TaskDataSourceTest {
         when(jpaTaskRepository.findByTag(tag, pageable)).thenReturn(List.of(commonTask));
 
         // when
-        List<TaskEntity> actual = readUnderTest.findByTag(tag, "0", "1");
+        List<TaskEntity> actual = readUserUnderTest.findByTag(tag, "0", "1");
 
         // then
         assertEquals(List.of(commonTask), actual);
     }
 
     @Test
-    void findByFinishDateGreaterThanEqual_sorted() {
+    void findAllCurrentTask_sorted() {
         // given
         Optional<Field> fieldToSort = Arrays
                 .stream(TaskEntity.class.getDeclaredFields())
@@ -189,7 +191,7 @@ class TaskDataSourceTest {
         when(jpaTaskRepository.findByFinishDateGreaterThanEqual(date, pageable)).thenReturn(List.of(commonTask));
 
         // when
-        List<TaskEntity> actual = readUnderTest.findByFinishDateGreaterThanEqual(date, "0", "1");
+        List<TaskEntity> actual = readAdminUnderTest.findCurrentTask(date, "0", "1");
 
         // then
         assertEquals(List.of(commonTask), actual);
@@ -204,7 +206,7 @@ class TaskDataSourceTest {
         when(jpaTaskRepository.findByFinishDateGreaterThanEqual(date, pageable)).thenReturn(List.of(commonTask));
 
         // when
-        List<TaskEntity> actual = readUnderTest.findByFinishDateGreaterThanEqual(date, "0", "1");
+        List<TaskEntity> actual = readAdminUnderTest.findCurrentTask(date, "0", "1");
 
         // then
         assertEquals(List.of(commonTask), actual);
@@ -253,7 +255,7 @@ class TaskDataSourceTest {
         when(jpaTaskRepository.findAll(pageable)).thenReturn(new PageImpl<>(List.of(commonTask)));
 
         // when
-        List<TaskEntity> actual = readUnderTest.findAll("0", "1");
+        List<TaskEntity> actual = readAdminUnderTest.findAllTasks("0", "1");
 
         // then
         assertEquals(List.of(commonTask), actual);
@@ -267,9 +269,64 @@ class TaskDataSourceTest {
         when(jpaTaskRepository.findAll(pageable)).thenReturn(new PageImpl<>(List.of(commonTask)));
 
         // when
-        List<TaskEntity> actual = readUnderTest.findAll("0", "1");
+        List<TaskEntity> actual = readAdminUnderTest.findAllTasks("0", "1");
 
         // then
         assertEquals(List.of(commonTask), actual);
+    }
+
+    @Test
+    void shouldFindById() {
+        // given
+        when(jpaTaskRepository.findById(commonTask.getId())).thenReturn(Optional.of(commonTask));
+
+        // when
+        TaskEntity actual = readAdminUnderTest.findById(commonTask.getId());
+
+        // then
+        assertEquals(commonTask, actual);
+    }
+
+    @Test
+    void shouldNotFindById_whenDoesNotExist() {
+        // given
+        when(jpaTaskRepository.findById(commonTask.getId())).thenReturn(Optional.empty());
+
+        // when
+        ApiException actual = catchThrowableOfType(() -> readAdminUnderTest.findById(commonTask.getId()), ApiException.class);
+
+        // then
+        assertEquals(exception(HttpStatus.NOT_FOUND, "tag [%s] not found", commonTask.getId()), actual);
+    }
+
+    @Test
+    void shouldFindAllCurrentUserTasks() {
+        // given
+        LocalDate date = LocalDate.now();
+        PageRequest pageable = PageRequest.of(0, 1);
+        when(taskSortingDispatcher.getPage("0", "1")).thenReturn(pageable);
+        List<TaskEntity> expected = List.of(commonTask);
+        when(jpaTaskRepository.findByFinishDateGreaterThanEqualAndCreator(date, creator, pageable)).thenReturn(expected);
+
+        // when
+        List<TaskEntity> actual = readUserUnderTest.findCurrentTask(date, "0", "1", creator);
+
+        // then
+        assertEquals(expected, actual);
+    }
+
+    @Test
+    void shouldFindAllUserTasks() {
+        // given
+        PageRequest pageable = PageRequest.of(0, 1);
+        when(taskSortingDispatcher.getPage("0", "1")).thenReturn(pageable);
+        List<TaskEntity> expected = List.of(commonTask);
+        when(jpaTaskRepository.findAllByCreator(creator, pageable)).thenReturn(expected);
+
+        // when
+        List<TaskEntity> actual = readUserUnderTest.findAllUserTasks("0", "1", creator);
+
+        // then
+        assertEquals(expected, actual);
     }
 }

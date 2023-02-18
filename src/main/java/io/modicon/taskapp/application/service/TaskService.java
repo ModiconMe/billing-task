@@ -5,21 +5,17 @@ import io.modicon.taskapp.domain.model.PriorityType;
 import io.modicon.taskapp.domain.model.TagEntity;
 import io.modicon.taskapp.domain.model.TaskEntity;
 import io.modicon.taskapp.domain.model.UserEntity;
-import io.modicon.taskapp.domain.repository.JpaTagRepository;
-import io.modicon.taskapp.domain.repository.JpaTaskRepository;
 import io.modicon.taskapp.domain.repository.TagDataSource;
 import io.modicon.taskapp.domain.repository.TaskDataSource;
+import io.modicon.taskapp.infrastructure.security.ApplicationUserRole;
 import io.modicon.taskapp.web.dto.TaskDto;
 import io.modicon.taskapp.web.interaction.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.lang.reflect.Field;
 import java.time.LocalDate;
 import java.util.*;
 
@@ -33,9 +29,9 @@ public interface TaskService {
 
     TaskDeleteResponse delete(String id, UserEntity user);
 
-    TaskGetByDateResponse get(String date, String page, String limit);
+    TaskGetByDateResponse get(String date, String page, String limit, UserEntity user);
 
-    TaskGetGroupByPriorityType get(String page, String limit);
+    TaskGetGroupByPriorityType get(String page, String limit, UserEntity user);
 
     @Slf4j
     @Transactional
@@ -43,7 +39,8 @@ public interface TaskService {
     @Service
     class Base implements TaskService {
 
-        private final TaskDataSource.Read readTaskDataSource;
+        private final TaskDataSource.ReadUser readUserTaskDataSource;
+        private final TaskDataSource.ReadAdmin readAdminTaskDataSource;
         private final TaskDataSource.Write writeTaskDataSource;
         private final TagDataSource.Read readTagDataSource;
         private final TagDataSource.Write writeTagDataSource;
@@ -53,7 +50,7 @@ public interface TaskService {
 
         @Override
         public TaskCreateResponse create(TaskCreateRequest request) {
-            readTaskDataSource.validateExistByIdAndCreator(request.getId(), request.getUser());
+            readUserTaskDataSource.validateExistByIdAndCreator(request.getId(), request.getUser());
 
             if (request.getFinishDate().isBefore(LocalDate.now()))
                 throw exception(HttpStatus.BAD_REQUEST, "finish date cannot be earlier than today's date");
@@ -86,7 +83,11 @@ public interface TaskService {
 
         @Override
         public TaskUpdateResponse update(String id, TaskUpdateRequest request) {
-            TaskEntity task = readTaskDataSource.findByIdAndCreator(id, request.getUser());
+            TaskEntity task;
+            if (request.getUser().getRole().equals(ApplicationUserRole.ADMIN)) // check admin role
+                task = readAdminTaskDataSource.findById(id);
+            else
+                task = readUserTaskDataSource.findByIdAndCreator(id, request.getUser());
 
             if (request.getFinishDate().isBefore(LocalDate.now()))
                 throw exception(HttpStatus.BAD_REQUEST, "finish date cannot be earlier than today's date");
@@ -95,12 +96,12 @@ public interface TaskService {
             if (request.getTag() != null) {
                 Optional<TagEntity> optionalTag = readTagDataSource.tryToFindTag(request.getTag());
                 if (optionalTag.isPresent()) {
-                     tag = optionalTag.get();
-                     if (!task.getTag().equals(tag)) {
-                         tag.addTask();
-                         task.getTag().removeTask();
-                         writeTagDataSource.save(task.getTag());
-                     }
+                    tag = optionalTag.get();
+                    if (!task.getTag().equals(tag)) {
+                        tag.addTask();
+                        task.getTag().removeTask();
+                        writeTagDataSource.save(task.getTag());
+                    }
                 } else {
                     tag = new TagEntity(request.getTag(), 0L);
                     tag.addTask();
@@ -132,7 +133,7 @@ public interface TaskService {
 
         @Override
         public TaskDeleteResponse delete(String id, UserEntity user) {
-            TaskEntity task = readTaskDataSource.findByIdAndCreator(id, user);
+            TaskEntity task = readUserTaskDataSource.findByIdAndCreator(id, user);
 
             task.getTag().removeTask();
             writeTagDataSource.delete(task.getTag());
@@ -145,17 +146,25 @@ public interface TaskService {
 
         @Transactional(readOnly = true)
         @Override
-        public TaskGetByDateResponse get(String date, String page, String limit) {
+        public TaskGetByDateResponse get(String date, String page, String limit, UserEntity user) {
             LocalDate parsedDate = LocalDate.parse(date);
 
-            List<TaskEntity> tasks = readTaskDataSource.findByFinishDateGreaterThanEqual(parsedDate, page, limit);
+            List<TaskEntity> tasks;
+            if (user.getRole().equals(ApplicationUserRole.ADMIN))
+                tasks = readAdminTaskDataSource.findCurrentTask(parsedDate, page, limit);
+            else
+                tasks = readUserTaskDataSource.findCurrentTask(parsedDate, page, limit, user);
 
             return new TaskGetByDateResponse(tasks.stream().map(taskDtoMapper).toList());
         }
 
         @Override
-        public TaskGetGroupByPriorityType get(String page, String limit) {
-            List<TaskEntity> tasks = readTaskDataSource.findAll(page, limit);
+        public TaskGetGroupByPriorityType get(String page, String limit, UserEntity user) {
+            List<TaskEntity> tasks;
+            if (user.getRole().equals(ApplicationUserRole.ADMIN))
+                tasks = readAdminTaskDataSource.findAllTasks(page, limit);
+            else
+                tasks = readUserTaskDataSource.findAllUserTasks(page, limit, user);
 
             Map<PriorityType, List<TaskDto>> priorityTaskMap = new LinkedHashMap<>();
             Arrays.stream(PriorityType.values()).forEach(p -> {

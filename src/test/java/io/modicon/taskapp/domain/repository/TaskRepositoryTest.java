@@ -4,6 +4,7 @@ import io.modicon.taskapp.domain.model.PriorityType;
 import io.modicon.taskapp.domain.model.TagEntity;
 import io.modicon.taskapp.domain.model.TaskEntity;
 import io.modicon.taskapp.domain.model.UserEntity;
+import io.modicon.taskapp.infrastructure.security.ApplicationUserRole;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
@@ -37,6 +38,7 @@ class TaskRepositoryTest {
         creator = UserEntity.builder()
                 .username("username")
                 .password("password")
+                .role(ApplicationUserRole.USER)
                 .build();
         tag = new TagEntity("tag", 1L);
         importantTask = TaskEntity.builder()

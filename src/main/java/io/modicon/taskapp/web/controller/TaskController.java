@@ -31,14 +31,18 @@ public interface TaskController {
     TaskDeleteResponse delete(@PathVariable String id,
                               @AuthenticationPrincipal UserEntity user);
 
+    @SecurityRequirement(name = "Bearer Authentication")
     @GetMapping("/byDate")
     TaskGetByDateResponse get(@RequestParam(value = "finish_date", required = false) String date,
                               @RequestParam(value = "page", defaultValue = "0") String page,
-                              @RequestParam(value = "limit", defaultValue = "20") String limit);
+                              @RequestParam(value = "limit", defaultValue = "20") String limit,
+                              @AuthenticationPrincipal UserEntity user);
 
+    @SecurityRequirement(name = "Bearer Authentication")
     @GetMapping
     TaskGetGroupByPriorityType get(@RequestParam(value = "page", defaultValue = "0") String page,
-                                   @RequestParam(value = "limit", defaultValue = "20") String limit);
+                                   @RequestParam(value = "limit", defaultValue = "20") String limit,
+                                   @AuthenticationPrincipal UserEntity user);
 
     @RequiredArgsConstructor
     @RestController
@@ -63,14 +67,14 @@ public interface TaskController {
         }
 
         @Override
-        public TaskGetByDateResponse get(String date, String page, String limit) {
-            return taskService.get(date, page, limit);
+        public TaskGetByDateResponse get(String date, String page, String limit, UserEntity user) {
+            return taskService.get(date, page, limit, user);
         }
 
         @Cacheable(value = "tasks")
         @Override
-        public TaskGetGroupByPriorityType get(String page, String limit) {
-            return taskService.get(page, limit);
+        public TaskGetGroupByPriorityType get(String page, String limit, UserEntity user) {
+            return taskService.get(page, limit, user);
         }
     }
 }
