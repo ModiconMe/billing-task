@@ -139,7 +139,6 @@ public interface TaskService {
                 task = readUserTaskDataSource.findByIdAndCreator(id, user);
 
             task.getTag().removeTask();
-            writeTagDataSource.delete(task.getTag());
 
             writeTaskDataSource.delete(task);
             taskFileService.deleteTaskFiles(id);

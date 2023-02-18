@@ -4,6 +4,7 @@ import io.modicon.taskapp.application.mapper.UserDtoMapper;
 import io.modicon.taskapp.domain.model.UserEntity;
 import io.modicon.taskapp.domain.repository.UserDataSource;
 import io.modicon.taskapp.infrastructure.exception.ApiException;
+import io.modicon.taskapp.infrastructure.security.jwt.JwtConfig;
 import io.modicon.taskapp.infrastructure.security.jwt.JwtGeneration;
 import io.modicon.taskapp.web.dto.UserDto;
 import io.modicon.taskapp.web.interaction.UserLoginRequest;
@@ -39,10 +40,12 @@ class UserManagementServiceTest {
     private PasswordEncoder passwordEncoder;
     @Mock
     private UserDtoMapper userDtoMapper;
+    @Mock
+    private JwtConfig jwtConfig;
 
     @BeforeEach
     void setUp() {
-        underTest = new UserManagementService.Base(userDataSource, passwordEncoder, userDtoMapper, jwtGeneration);
+        underTest = new UserManagementService.Base(userDataSource, passwordEncoder, userDtoMapper, jwtGeneration, jwtConfig);
     }
 
     private UserEntity user;

@@ -29,7 +29,7 @@ public class SecurityConfig {
     };
 
     private static final String[] REGISTER_AND_LOGIN = {
-            "/api/v1/users/register", "/api/v1/users/login"
+            "/api/v1/users/register", "/api/v1/users/login", "/api/v1/users/register/*"
     };
 
     @Bean

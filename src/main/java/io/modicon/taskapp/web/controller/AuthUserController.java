@@ -9,10 +9,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 public interface AuthUserController {
 
@@ -20,6 +17,9 @@ public interface AuthUserController {
 
     @PostMapping("/register")
     ResponseEntity<UserRegisterResponse> register(@Valid @RequestBody UserRegisterRequest request);
+
+    @PostMapping("/register/{secret}")
+    ResponseEntity<UserRegisterResponse> register(@Valid @RequestBody UserRegisterRequest request, @PathVariable String secret);
 
     @PostMapping("/login")
     ResponseEntity<UserLoginResponse> login(@Valid @RequestBody UserLoginRequest request);
@@ -34,6 +34,12 @@ public interface AuthUserController {
         @Override
         public ResponseEntity<UserRegisterResponse> register(UserRegisterRequest request) {
             userManagementService.register(request);
+            return ResponseEntity.ok().build();
+        }
+
+        @Override
+        public ResponseEntity<UserRegisterResponse> register(UserRegisterRequest request, String secret) {
+            userManagementService.registerAdmin(request, secret);
             return ResponseEntity.ok().build();
         }
 
