@@ -306,7 +306,6 @@ class TaskServiceTest {
         underTest.delete(commonTask.getId(), creator);
 
         // then
-        verify(writeTagDataSource).delete(commonTask.getTag());
         verify(writeTaskDataSource).delete(commonTask);
         verify(taskFileService).deleteTaskFiles(commonTask.getId());
     }
@@ -320,7 +319,6 @@ class TaskServiceTest {
         underTest.delete(commonTask.getId(), admin);
 
         // then
-        verify(writeTagDataSource).delete(commonTask.getTag());
         verify(writeTaskDataSource).delete(commonTask);
         verify(taskFileService).deleteTaskFiles(commonTask.getId());
     }
