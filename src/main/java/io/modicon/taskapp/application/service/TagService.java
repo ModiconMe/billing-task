@@ -17,6 +17,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
+import static io.modicon.taskapp.infrastructure.exception.ApiException.exception;
+
 public interface TagService {
     TagGetByIdWithTaskResponse getTagWithTasks(String tagName, String page, String limit);
 
@@ -73,7 +75,7 @@ public interface TagService {
         @Override
         public TagUpdateResponse update(TagUpdateRequest request) {
             if (!request.getUser().getRole().equals(ApplicationUserRole.ADMIN))
-                throw ApiException.exception(HttpStatus.UNAUTHORIZED, "you are not allow to do this operation");
+                throw exception(HttpStatus.UNAUTHORIZED, "you are not allow to do this operation");
 
             String updatedTagName = request.getUpdatedTag();
             TagEntity tag = readTagDataSource.findById(updatedTagName);
@@ -82,6 +84,7 @@ public interface TagService {
             readTagDataSource.validateNotExist(newTagName);
 
             tag.setNewName(newTagName); // set new name
+            writeTagDataSource.save(tag);
 
             return new TagUpdateResponse(tagDtoMapper.apply(tag));
         }
@@ -89,7 +92,7 @@ public interface TagService {
         @Override
         public TagDeleteResponse delete(String tagName, UserEntity user) {
             if (!user.getRole().equals(ApplicationUserRole.ADMIN))
-                throw ApiException.exception(HttpStatus.UNAUTHORIZED, "you are not allow to do this operation");
+                throw exception(HttpStatus.UNAUTHORIZED, "you are not allow to do this operation");
 
             TagEntity tag = readTagDataSource.findById(tagName);
 
