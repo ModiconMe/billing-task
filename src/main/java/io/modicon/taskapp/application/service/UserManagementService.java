@@ -3,6 +3,7 @@ package io.modicon.taskapp.application.service;
 import io.modicon.taskapp.application.mapper.UserDtoMapper;
 import io.modicon.taskapp.domain.model.UserEntity;
 import io.modicon.taskapp.domain.repository.UserDataSource;
+import io.modicon.taskapp.infrastructure.security.ApplicationUserRole;
 import io.modicon.taskapp.infrastructure.security.jwt.JwtGeneration;
 import io.modicon.taskapp.web.interaction.UserLoginRequest;
 import io.modicon.taskapp.web.interaction.UserLoginResponse;
@@ -40,6 +41,7 @@ public interface UserManagementService {
             UserEntity user = UserEntity.builder()
                     .username(username)
                     .password(passwordEncoder.encode(request.getPassword()))
+                    .role(ApplicationUserRole.USER)
                     .build();
              userDataSource.save(user);
 

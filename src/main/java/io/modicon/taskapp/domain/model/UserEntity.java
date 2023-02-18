@@ -1,5 +1,6 @@
 package io.modicon.taskapp.domain.model;
 
+import io.modicon.taskapp.infrastructure.security.ApplicationUserRole;
 import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.security.core.GrantedAuthority;
@@ -24,6 +25,10 @@ public class UserEntity implements UserDetails {
     @Column(nullable = false)
     private String password;
 
+    @Column(nullable = false)
+    @Enumerated(EnumType.STRING)
+    private ApplicationUserRole role;
+
     @Singular
     @OneToMany(
             cascade = {CascadeType.REMOVE, CascadeType.MERGE},
@@ -33,7 +38,7 @@ public class UserEntity implements UserDetails {
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return null;
+        return role.getGrantedAuthorities();
     }
 
     @Override
