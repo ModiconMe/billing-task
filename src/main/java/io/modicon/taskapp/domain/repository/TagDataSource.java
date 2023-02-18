@@ -41,7 +41,7 @@ public interface TagDataSource {
         @Override
         public TagEntity findById(String id) {
             return jpaTagRepository.findById(id)
-                    .orElseThrow(() -> exception(HttpStatus.NOT_FOUND, "tag [%s] not found", id));;
+                    .orElseThrow(() -> exception(HttpStatus.NOT_FOUND, "tag [%s] not found", id));
         }
 
         @Override
