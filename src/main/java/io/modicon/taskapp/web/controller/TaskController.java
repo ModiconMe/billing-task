@@ -10,7 +10,6 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
-@SecurityRequirement(name = "Bearer Authentication")
 public interface TaskController {
 
     String BASE_URL_V1 = "api/v1/tasks";
@@ -39,6 +38,7 @@ public interface TaskController {
                                    @RequestParam(value = "limit", defaultValue = "20") String limit,
                                    @AuthenticationPrincipal UserEntity user);
 
+    @SecurityRequirement(name = "Bearer Authentication")
     @RequiredArgsConstructor
     @RestController
     @RequestMapping(BASE_URL_V1)

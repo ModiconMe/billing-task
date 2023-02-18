@@ -1,5 +1,6 @@
 package io.modicon.taskapp.web.interaction;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import io.modicon.taskapp.domain.model.UserEntity;
@@ -14,8 +15,10 @@ import lombok.With;
 @JsonTypeName("tag")
 public class TagUpdateRequest {
 
+    @JsonIgnore
     @With
     private UserEntity user;
+    @JsonIgnore
     @With
     private String updatedTag;
 

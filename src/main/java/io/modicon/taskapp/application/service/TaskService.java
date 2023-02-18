@@ -111,7 +111,7 @@ public interface TaskService {
             PriorityType taskPriorityType = null;
             if (request.getPriorityType() != null) {
                 try {
-                    taskPriorityType = PriorityType.valueOf(PriorityType.class, request.getPriorityType());
+                    taskPriorityType = PriorityType.valueOf(PriorityType.class, request.getPriorityType().toUpperCase());
                 } catch (Exception e) {
                     throw exception(HttpStatus.BAD_REQUEST,
                             "wrong priority type for task, it only supports %s", Arrays.toString(PriorityType.values()));

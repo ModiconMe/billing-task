@@ -9,7 +9,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
-@SecurityRequirement(name = "Bearer Authentication")
 public interface TagController {
 
     String BASE_URL_V1 = "api/v1/tags";
@@ -33,6 +32,7 @@ public interface TagController {
     TagDeleteResponse delete(@PathVariable String tagName,
                              @AuthenticationPrincipal UserEntity user);
 
+    @SecurityRequirement(name = "Bearer Authentication")
     @RequiredArgsConstructor
     @RestController
     @RequestMapping(BASE_URL_V1)

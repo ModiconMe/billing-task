@@ -2,6 +2,7 @@ package io.modicon.taskapp.web.controller;
 
 import io.modicon.taskapp.application.service.TaskFileService;
 import io.modicon.taskapp.web.interaction.*;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -21,6 +22,7 @@ public interface FileUploadController {
     @GetMapping("/{taskName}/{fileName}")
     ResponseEntity<?> download(@PathVariable String taskName, @PathVariable String fileName);
 
+    @SecurityRequirement(name = "Bearer Authentication")
     @RequiredArgsConstructor
     @RestController
     @RequestMapping(BASE_URL_V1)

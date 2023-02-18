@@ -1,5 +1,6 @@
 package io.modicon.taskapp.web.interaction;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import io.modicon.taskapp.domain.model.UserEntity;
@@ -17,6 +18,7 @@ import java.util.Set;
 @JsonTypeName("task")
 public class TaskUpdateRequest {
 
+    @JsonIgnore
     @With
     private UserEntity user;
 
