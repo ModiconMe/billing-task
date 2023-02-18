@@ -38,6 +38,8 @@ dependencies {
     compileOnly 'org.projectlombok:lombok'
     annotationProcessor 'org.projectlombok:lombok'
 
+    testCompileOnly 'org.projectlombok:lombok'
+    testAnnotationProcessor 'org.projectlombok:lombok'
     testRuntimeOnly "com.h2database:h2:${h2Version}"
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
 }
@@ -45,6 +47,32 @@ dependencies {
 test {
     useJUnitPlatform()
     finalizedBy jacocoTestReport
+}
+
+// integration tests setup
+testing {
+    suites {
+        intTest(JvmTestSuite) {
+            dependencies {
+                implementation project
+            }
+        }
+    }
+}
+dependencies {
+    intTestImplementation 'org.springframework.boot:spring-boot-starter-web'
+    intTestCompileOnly 'org.projectlombok:lombok'
+    intTestAnnotationProcessor 'org.projectlombok:lombok'
+    intTestRuntimeOnly "com.h2database:h2:${h2Version}"
+    intTestImplementation 'org.springframework.boot:spring-boot-starter-test'
+    intTestImplementation "org.springframework.cloud:spring-cloud-starter-openfeign:${openFeignVersion}"
+    intTestImplementation "io.github.openfeign:feign-jackson:${jacksonFeignVersion}"
+    intTestImplementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.14.2'
+
+}
+
+tasks.named('check') {
+    dependsOn testing.suites.intTest
 }
 
 jacocoTestReport {

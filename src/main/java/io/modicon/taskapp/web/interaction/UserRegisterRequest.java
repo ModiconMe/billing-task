@@ -18,6 +18,6 @@ import lombok.NoArgsConstructor;
 public class UserRegisterRequest {
     @NotEmpty(message = "username must be not empty")
     private String username;
-    @Size(min = 2, max = 32, message = "password must be up 2 and under 32 characters")
+    @Size(min = 2, max = 128, message = "password must be up 2 and under 128 characters")
     private String password;
 }

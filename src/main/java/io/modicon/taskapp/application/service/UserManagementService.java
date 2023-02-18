@@ -68,7 +68,7 @@ public interface UserManagementService {
                 userDataSource.save(user);
                 return new UserRegisterResponse();
             }
-            throw ApiException.exception(HttpStatus.UNAUTHORIZED, "you are not allowed to do this operation");
+            throw ApiException.exception(HttpStatus.FORBIDDEN, "you are not allowed to do this operation");
         }
 
         @Override
@@ -77,7 +77,7 @@ public interface UserManagementService {
             UserEntity user = userDataSource.findById(username);
 
             if (!passwordEncoder.matches(request.getPassword(), user.getPassword()))
-                throw exception(HttpStatus.FORBIDDEN, "wrong password");
+                throw exception(HttpStatus.UNAUTHORIZED, "wrong password");
 
             String token = jwtGeneration.generateAccessToken(user);
 
