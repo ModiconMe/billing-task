@@ -3,6 +3,7 @@ package io.modicon.taskapp.application.service;
 import io.modicon.taskapp.domain.model.FileData;
 import io.modicon.taskapp.domain.model.TaskEntity;
 import io.modicon.taskapp.domain.repository.JpaTaskRepository;
+import io.modicon.taskapp.domain.repository.TaskDataSource;
 import io.modicon.taskapp.web.interaction.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -32,12 +33,11 @@ public interface TaskFileService {
     class Base implements TaskFileService {
 
         private final FileManagementService fileManagementService;
-        private final JpaTaskRepository taskRepository;
+        private final TaskDataSource.ReadAdmin taskDataService;
 
         @Override
         public TaskFileListResponse listFiles(String taskName) {
-            TaskEntity task = taskRepository.findById(taskName).orElseThrow(() ->
-                    exception(HttpStatus.NOT_FOUND, "task not found..."));
+            TaskEntity task = taskDataService.findById(taskName);
 
             Map<String, String> files = new HashMap<>();
             task.getFiles().forEach(f -> files.put(f.getId(), f.getName()));
@@ -47,16 +47,14 @@ public interface TaskFileService {
 
         @Override
         public TaskFileUploadResponse upload(TaskFileUploadRequest request) {
-            TaskEntity task = taskRepository.findById(request.getTaskName()).orElseThrow(() ->
-                    exception(HttpStatus.NOT_FOUND, "task not found..."));
+            TaskEntity task = taskDataService.findById(request.getTaskName());
 
             return new TaskFileUploadResponse(fileManagementService.store(task, request.getFile()));
         }
 
         @Override
         public TaskFileDownloadResponse download(TaskFileDownloadRequest request) {
-            TaskEntity task = taskRepository.findById(request.getTaskName()).orElseThrow(() ->
-                    exception(HttpStatus.NOT_FOUND, "task not found..."));
+            TaskEntity task = taskDataService.findById(request.getTaskName());;
 
             FileData file = task.getFiles().stream().filter(f -> f.getId().equals(request.getFileId())).findFirst()
                     .orElseThrow(() -> exception(HttpStatus.NOT_FOUND, "file not found..."));
