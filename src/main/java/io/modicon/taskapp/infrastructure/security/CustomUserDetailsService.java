@@ -1,6 +1,7 @@
 package io.modicon.taskapp.infrastructure.security;
 
 import io.modicon.taskapp.domain.repository.JpaUserRepository;
+import io.modicon.taskapp.domain.repository.UserDataSource;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -11,10 +12,10 @@ import org.springframework.stereotype.Service;
 @Service
 public class CustomUserDetailsService implements UserDetailsService {
 
-    private final JpaUserRepository userRepository;
+    private final UserDataSource userDataSource;
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        return userRepository.findById(username).orElse(null);
+        return userDataSource.findById(username);
     }
 }
