@@ -7,6 +7,7 @@ import io.modicon.taskapp.domain.model.TagEntity;
 import io.modicon.taskapp.domain.model.TaskEntity;
 import io.modicon.taskapp.domain.repository.JpaTagRepository;
 import io.modicon.taskapp.domain.repository.JpaTaskRepository;
+import io.modicon.taskapp.domain.repository.TagDataSource;
 import io.modicon.taskapp.domain.repository.TaskDataSource;
 import io.modicon.taskapp.web.interaction.*;
 import lombok.RequiredArgsConstructor;
@@ -39,19 +40,19 @@ public interface TagService {
     @Service
     class Base implements TagService {
 
-        private final JpaTagRepository tagRepository;
+        private final TagDataSource.Read readTagDataSource;
+        private final TagDataSource.Write writeTagDataSource;
         private final TaskDataSource.Read readTaskDataSource;
         private final TaskDataSource.Write writeTaskDataSource;
+        private final TaskFileService taskFileService;
 
         private final TaskDtoMapper taskDtoMapper;
         private final TagDtoMapper tagDtoMapper;
-        private final TaskFileService taskFileService;
 
         @Transactional(readOnly = true)
         @Override
         public TagGetByIdWithTaskResponse getTagWithTasks(String tagName, String page, String limit) {
-            TagEntity tag = tagRepository.findById(tagName)
-                    .orElseThrow(() -> exception(HttpStatus.NOT_FOUND, "tag [%s] not found", tagName));
+            TagEntity tag = readTagDataSource.findById(tagName);
 
             List<TaskEntity> tasks = readTaskDataSource.findByTag(tag, page, limit);
 
@@ -61,18 +62,17 @@ public interface TagService {
         @Transactional(readOnly = true)
         @Override
         public TagGetAllWithTaskExistedResponse getAllTagsWithExistedTasks() {
-            List<TagEntity> tags = tagRepository.findAllByTaskCountIsGreaterThan(0L);
+            List<TagEntity> tags = readTagDataSource.findTagWithTasks(0L);
             return new TagGetAllWithTaskExistedResponse(tags.stream().map(tagDtoMapper).toList());
         }
 
         @Override
         public TagCreateResponse create(TagCreateRequest request) {
             String tagName = request.getTag();
-            if (tagRepository.existsById(tagName))
-                throw exception(HttpStatus.BAD_REQUEST, "tag [%s] already exist", tagName);
+            readTagDataSource.validateNotExist(tagName);
 
             TagEntity tag = new TagEntity(tagName, 0L);
-            tagRepository.save(tag);
+            writeTagDataSource.save(tag);
 
             return new TagCreateResponse(tagDtoMapper.apply(tag));
         }
@@ -80,12 +80,10 @@ public interface TagService {
         @Override
         public TagUpdateResponse update(TagUpdateRequest request) {
             String updatedTagName = request.getUpdatedTag();
-            TagEntity tag = tagRepository.findById(updatedTagName)
-                    .orElseThrow(() -> exception(HttpStatus.NOT_FOUND, "tag [%s] not found", updatedTagName));
+            TagEntity tag = readTagDataSource.findById(updatedTagName);
 
             String newTagName = request.getTag();
-            if (tagRepository.existsById(newTagName))
-                throw exception(HttpStatus.BAD_REQUEST, "tag [%s] already exist", newTagName);
+            readTagDataSource.validateNotExist(newTagName);
 
             tag.setNewName(newTagName); // set new name
 
@@ -94,13 +92,12 @@ public interface TagService {
 
         @Override
         public TagDeleteResponse delete(String tagName) {
-            TagEntity tag = tagRepository.findById(tagName)
-                    .orElseThrow(() -> exception(HttpStatus.NOT_FOUND, "tag [%s] not found", tagName));
+            TagEntity tag = readTagDataSource.findById(tagName);
 
             List<TaskEntity> tasks = readTaskDataSource.findByTag(tag);
             tasks.forEach(t -> taskFileService.deleteTaskFiles(t.getId()));
             writeTaskDataSource.deleteAll(tasks);
-            tagRepository.delete(tag);
+            writeTagDataSource.delete(tag);
 
             return new TagDeleteResponse(tagDtoMapper.apply(tag));
         }
