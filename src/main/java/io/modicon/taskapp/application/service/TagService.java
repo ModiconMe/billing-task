@@ -7,6 +7,7 @@ import io.modicon.taskapp.domain.model.TagEntity;
 import io.modicon.taskapp.domain.model.TaskEntity;
 import io.modicon.taskapp.domain.repository.JpaTagRepository;
 import io.modicon.taskapp.domain.repository.JpaTaskRepository;
+import io.modicon.taskapp.domain.repository.TaskDataSource;
 import io.modicon.taskapp.web.interaction.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
@@ -39,7 +40,9 @@ public interface TagService {
     class Base implements TagService {
 
         private final JpaTagRepository tagRepository;
-        private final JpaTaskRepository taskRepository;
+        private final TaskDataSource.Read readTaskDataSource;
+        private final TaskDataSource.Write writeTaskDataSource;
+
         private final TaskDtoMapper taskDtoMapper;
         private final TagDtoMapper tagDtoMapper;
         private final TaskFileService taskFileService;
@@ -50,20 +53,7 @@ public interface TagService {
             TagEntity tag = tagRepository.findById(tagName)
                     .orElseThrow(() -> exception(HttpStatus.NOT_FOUND, "tag [%s] not found", tagName));
 
-            Optional<Field> fieldToSort = Arrays
-                    .stream(TaskEntity.class.getDeclaredFields())
-                    .filter(f -> f.getType().equals(PriorityType.class))
-                    .findFirst();
-
-            List<TaskEntity> tasks;
-            tasks = fieldToSort.map(field -> taskRepository.findByTag(tag, PageRequest.of(
-                            Integer.parseInt(page),
-                            Integer.parseInt(limit),
-                            Sort.by(field.getName()))))
-                    .orElseGet(() -> taskRepository.findByTag(tag, PageRequest.of(
-                            Integer.parseInt(page),
-                            Integer.parseInt(limit))
-                    ));
+            List<TaskEntity> tasks = readTaskDataSource.findByTag(tag, page, limit);
 
             return new TagGetByIdWithTaskResponse(tagDtoMapper.apply(tag), tasks.stream().map(taskDtoMapper).toList());
         }
@@ -107,9 +97,9 @@ public interface TagService {
             TagEntity tag = tagRepository.findById(tagName)
                     .orElseThrow(() -> exception(HttpStatus.NOT_FOUND, "tag [%s] not found", tagName));
 
-            List<TaskEntity> tasks = taskRepository.findByTag(tag);
+            List<TaskEntity> tasks = readTaskDataSource.findByTag(tag);
             tasks.forEach(t -> taskFileService.deleteTaskFiles(t.getId()));
-            taskRepository.deleteAll(tasks);
+            writeTaskDataSource.deleteAll(tasks);
             tagRepository.delete(tag);
 
             return new TagDeleteResponse(tagDtoMapper.apply(tag));

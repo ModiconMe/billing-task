@@ -42,14 +42,15 @@ public interface TaskService {
     @Service
     class Base implements TaskService {
 
-        private final TaskDataSource taskDataSource;
+        private final TaskDataSource.Read readTaskDataSource;
+        private final TaskDataSource.Write writeTaskDataSource;
         private final JpaTagRepository tagRepository;
         private final TaskDtoMapper taskDtoMapper;
         private final TaskFileService taskFileService;
 
         @Override
         public TaskCreateResponse create(TaskCreateRequest request) {
-            taskDataSource.validateExistByIdAndCreator(request.getId(), request.getUser());
+            readTaskDataSource.validateExistByIdAndCreator(request.getId(), request.getUser());
 
             if (request.getFinishDate().isBefore(LocalDate.now()))
                 throw exception(HttpStatus.BAD_REQUEST, "finish date cannot be earlier than today's date");
@@ -76,14 +77,14 @@ public interface TaskService {
                     .creator(request.getUser())
                     .build();
 
-            taskDataSource.save(task);
+            writeTaskDataSource.save(task);
 
             return new TaskCreateResponse(taskDtoMapper.apply(task));
         }
 
         @Override
         public TaskUpdateResponse update(String id, TaskUpdateRequest request) {
-            TaskEntity task = taskDataSource.findByIdAndCreator(id, request.getUser());
+            TaskEntity task = readTaskDataSource.findByIdAndCreator(id, request.getUser());
 
             if (request.getFinishDate().isBefore(LocalDate.now()))
                 throw exception(HttpStatus.BAD_REQUEST, "finish date cannot be earlier than today's date");
@@ -122,19 +123,19 @@ public interface TaskService {
                     .tag(tag != null ? tag : task.getTag())
                     .build();
 
-            taskDataSource.save(task);
+            writeTaskDataSource.save(task);
 
             return new TaskUpdateResponse(taskDtoMapper.apply(task));
         }
 
         @Override
         public TaskDeleteResponse delete(String id, UserEntity user) {
-            TaskEntity task = taskDataSource.findByIdAndCreator(id, user);
+            TaskEntity task = readTaskDataSource.findByIdAndCreator(id, user);
 
             task.getTag().removeTask();
             tagRepository.delete(task.getTag());
 
-            taskDataSource.delete(task);
+            writeTaskDataSource.delete(task);
             taskFileService.deleteTaskFiles(id);
 
             return new TaskDeleteResponse(task.getId());
@@ -145,14 +146,14 @@ public interface TaskService {
         public TaskGetByDateResponse get(String date, String page, String limit) {
             LocalDate parsedDate = LocalDate.parse(date);
 
-            List<TaskEntity> tasks = taskDataSource.findByFinishDateGreaterThanEqual(parsedDate, page, limit);
+            List<TaskEntity> tasks = readTaskDataSource.findByFinishDateGreaterThanEqual(parsedDate, page, limit);
 
             return new TaskGetByDateResponse(tasks.stream().map(taskDtoMapper).toList());
         }
 
         @Override
         public TaskGetGroupByPriorityType get(String page, String limit) {
-            List<TaskEntity> tasks = taskDataSource.findAll(page, limit);
+            List<TaskEntity> tasks = readTaskDataSource.findAll(page, limit);
 
             Map<PriorityType, List<TaskDto>> priorityTaskMap = new LinkedHashMap<>();
             Arrays.stream(PriorityType.values()).forEach(p -> {
