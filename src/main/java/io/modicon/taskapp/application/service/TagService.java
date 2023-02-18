@@ -4,10 +4,14 @@ import io.modicon.taskapp.application.mapper.TagDtoMapper;
 import io.modicon.taskapp.application.mapper.TaskDtoMapper;
 import io.modicon.taskapp.domain.model.TagEntity;
 import io.modicon.taskapp.domain.model.TaskEntity;
+import io.modicon.taskapp.domain.model.UserEntity;
 import io.modicon.taskapp.domain.repository.TagDataSource;
 import io.modicon.taskapp.domain.repository.TaskDataSource;
+import io.modicon.taskapp.infrastructure.exception.ApiException;
+import io.modicon.taskapp.infrastructure.security.ApplicationUserRole;
 import io.modicon.taskapp.web.interaction.*;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -22,7 +26,7 @@ public interface TagService {
 
     TagUpdateResponse update(TagUpdateRequest request);
 
-    TagDeleteResponse delete(String tagName);
+    TagDeleteResponse delete(String tagName, UserEntity user);
 
     @Transactional
     @RequiredArgsConstructor
@@ -68,6 +72,9 @@ public interface TagService {
 
         @Override
         public TagUpdateResponse update(TagUpdateRequest request) {
+            if (!request.getUser().getRole().equals(ApplicationUserRole.ADMIN))
+                throw ApiException.exception(HttpStatus.UNAUTHORIZED, "you are not allow to do this operation");
+
             String updatedTagName = request.getUpdatedTag();
             TagEntity tag = readTagDataSource.findById(updatedTagName);
 
@@ -80,7 +87,10 @@ public interface TagService {
         }
 
         @Override
-        public TagDeleteResponse delete(String tagName) {
+        public TagDeleteResponse delete(String tagName, UserEntity user) {
+            if (!user.getRole().equals(ApplicationUserRole.ADMIN))
+                throw ApiException.exception(HttpStatus.UNAUTHORIZED, "you are not allow to do this operation");
+
             TagEntity tag = readTagDataSource.findById(tagName);
 
             List<TaskEntity> tasks = readTaskDataSource.findByTag(tag);

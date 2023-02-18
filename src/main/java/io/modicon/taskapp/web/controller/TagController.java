@@ -1,12 +1,15 @@
 package io.modicon.taskapp.web.controller;
 
 import io.modicon.taskapp.application.service.TagService;
+import io.modicon.taskapp.domain.model.UserEntity;
 import io.modicon.taskapp.web.interaction.*;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
+@SecurityRequirement(name = "Bearer Authentication")
 public interface TagController {
 
     String BASE_URL_V1 = "api/v1/tags";
@@ -19,17 +22,16 @@ public interface TagController {
     @GetMapping
     TagGetAllWithTaskExistedResponse getAllTagsWithExistedTasks();
 
-    @SecurityRequirement(name = "Bearer Authentication")
     @PostMapping
     TagCreateResponse create(@Valid @RequestBody TagCreateRequest request);
 
-    @SecurityRequirement(name = "Bearer Authentication")
     @PutMapping("/{tagName}")
-    TagUpdateResponse update(@PathVariable String tagName, @Valid @RequestBody TagUpdateRequest request);
+    TagUpdateResponse update(@PathVariable String tagName, @Valid @RequestBody TagUpdateRequest request,
+                             @AuthenticationPrincipal UserEntity user);
 
-    @SecurityRequirement(name = "Bearer Authentication")
     @DeleteMapping("/{tagName}")
-    TagDeleteResponse delete(@PathVariable String tagName);
+    TagDeleteResponse delete(@PathVariable String tagName,
+                             @AuthenticationPrincipal UserEntity user);
 
     @RequiredArgsConstructor
     @RestController
@@ -54,13 +56,13 @@ public interface TagController {
         }
 
         @Override
-        public TagUpdateResponse update(String tagName, TagUpdateRequest request) {
-            return tagService.update(request.withUpdatedTag(tagName));
+        public TagUpdateResponse update(String tagName, TagUpdateRequest request, UserEntity user) {
+            return tagService.update(request.withUpdatedTag(tagName).withUser(user));
         }
 
         @Override
-        public TagDeleteResponse delete(String tagName) {
-            return tagService.delete(tagName);
+        public TagDeleteResponse delete(String tagName, UserEntity user) {
+            return tagService.delete(tagName, user);
         }
     }
 
