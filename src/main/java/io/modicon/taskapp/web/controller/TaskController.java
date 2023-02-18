@@ -10,6 +10,8 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
+
 public interface TaskController {
 
     String BASE_URL_V1 = "api/v1/tasks";
@@ -28,7 +30,7 @@ public interface TaskController {
                               @AuthenticationPrincipal UserEntity user);
 
     @GetMapping("/byDate")
-    TaskGetByDateResponse get(@RequestParam(value = "finish_date", required = false) String date,
+    TaskGetByDateResponse get(@RequestParam(value = "finish_date") String date,
                               @RequestParam(value = "page", defaultValue = "0") String page,
                               @RequestParam(value = "limit", defaultValue = "20") String limit,
                               @AuthenticationPrincipal UserEntity user);

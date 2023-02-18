@@ -2,6 +2,7 @@ package io.modicon.taskapp.web.interaction;
 
 import io.modicon.taskapp.web.dto.TagDto;
 import lombok.AllArgsConstructor;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 

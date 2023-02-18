@@ -4,9 +4,11 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import jakarta.validation.constraints.NotEmpty;
 import lombok.AllArgsConstructor;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+@EqualsAndHashCode
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter

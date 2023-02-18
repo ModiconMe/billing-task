@@ -6,6 +6,7 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 import io.modicon.taskapp.domain.model.UserEntity;
 import jakarta.validation.constraints.NotEmpty;
 import lombok.AllArgsConstructor;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.With;
 
