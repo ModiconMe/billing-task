@@ -55,7 +55,7 @@ public interface TaskService {
             if (request.getFinishDate().isBefore(LocalDate.now()))
                 throw exception(HttpStatus.BAD_REQUEST, "finish date cannot be earlier than today's date");
 
-            TagEntity tag = readTagDataSource.supplyTag(request.getId());
+            TagEntity tag = readTagDataSource.supplyTag(request.getTag());
             tag.addTask();
 
             PriorityType taskPriorityType;
@@ -113,7 +113,6 @@ public interface TaskService {
                 try {
                     taskPriorityType = PriorityType.valueOf(PriorityType.class, request.getPriorityType());
                 } catch (Exception e) {
-                    e.printStackTrace();
                     throw exception(HttpStatus.BAD_REQUEST,
                             "wrong priority type for task, it only supports %s", Arrays.toString(PriorityType.values()));
                 }
@@ -133,7 +132,11 @@ public interface TaskService {
 
         @Override
         public TaskDeleteResponse delete(String id, UserEntity user) {
-            TaskEntity task = readUserTaskDataSource.findByIdAndCreator(id, user);
+            TaskEntity task;
+            if (user.getRole().equals(ApplicationUserRole.ADMIN))
+                task = readAdminTaskDataSource.findById(id);
+            else
+                task = readUserTaskDataSource.findByIdAndCreator(id, user);
 
             task.getTag().removeTask();
             writeTagDataSource.delete(task.getTag());
