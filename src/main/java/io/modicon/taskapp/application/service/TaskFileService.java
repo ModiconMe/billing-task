@@ -66,16 +66,6 @@ public interface TaskFileService {
 
         @Override
         public void deleteTaskFiles(String taskName) {
-//            File file = new File(taskName);
-//            File[] contents = file.listFiles();
-//            if (contents != null) {
-//                for (File f : contents) {
-//                    if (! Files.isSymbolicLink(f.toPath())) {
-//                        deleteTaskFiles(f.getName());
-//                    }
-//                }
-//            }
-//            file.delete();
             fileManagementService.deleteFileDirectory(taskName);
         }
     }
