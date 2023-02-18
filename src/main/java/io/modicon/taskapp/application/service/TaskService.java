@@ -7,6 +7,7 @@ import io.modicon.taskapp.domain.model.TaskEntity;
 import io.modicon.taskapp.domain.model.UserEntity;
 import io.modicon.taskapp.domain.repository.JpaTagRepository;
 import io.modicon.taskapp.domain.repository.JpaTaskRepository;
+import io.modicon.taskapp.domain.repository.TagDataSource;
 import io.modicon.taskapp.domain.repository.TaskDataSource;
 import io.modicon.taskapp.web.dto.TaskDto;
 import io.modicon.taskapp.web.interaction.*;
@@ -44,9 +45,11 @@ public interface TaskService {
 
         private final TaskDataSource.Read readTaskDataSource;
         private final TaskDataSource.Write writeTaskDataSource;
-        private final JpaTagRepository tagRepository;
-        private final TaskDtoMapper taskDtoMapper;
+        private final TagDataSource.Read readTagDataSource;
+        private final TagDataSource.Write writeTagDataSource;
         private final TaskFileService taskFileService;
+
+        private final TaskDtoMapper taskDtoMapper;
 
         @Override
         public TaskCreateResponse create(TaskCreateRequest request) {
@@ -55,8 +58,7 @@ public interface TaskService {
             if (request.getFinishDate().isBefore(LocalDate.now()))
                 throw exception(HttpStatus.BAD_REQUEST, "finish date cannot be earlier than today's date");
 
-            TagEntity tag = tagRepository
-                    .findById(request.getTag()).orElseGet(() -> new TagEntity(request.getTag(), 0L));
+            TagEntity tag = readTagDataSource.supplyTag(request.getId());
             tag.addTask();
 
             PriorityType taskPriorityType;
@@ -91,13 +93,13 @@ public interface TaskService {
 
             TagEntity tag = null;
             if (request.getTag() != null) {
-                Optional<TagEntity> optionalTag = tagRepository.findById(request.getTag());
+                Optional<TagEntity> optionalTag = readTagDataSource.tryToFindTag(request.getTag());
                 if (optionalTag.isPresent()) {
                      tag = optionalTag.get();
                      if (!task.getTag().equals(tag)) {
                          tag.addTask();
                          task.getTag().removeTask();
-                         tagRepository.save(task.getTag());
+                         writeTagDataSource.save(task.getTag());
                      }
                 } else {
                     tag = new TagEntity(request.getTag(), 0L);
@@ -133,7 +135,7 @@ public interface TaskService {
             TaskEntity task = readTaskDataSource.findByIdAndCreator(id, user);
 
             task.getTag().removeTask();
-            tagRepository.delete(task.getTag());
+            writeTagDataSource.delete(task.getTag());
 
             writeTaskDataSource.delete(task);
             taskFileService.deleteTaskFiles(id);

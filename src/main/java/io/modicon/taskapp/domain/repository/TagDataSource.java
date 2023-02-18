@@ -6,6 +6,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 import static io.modicon.taskapp.infrastructure.exception.ApiException.exception;
 
@@ -18,6 +19,10 @@ public interface TagDataSource {
         TagEntity findById(String id);
 
         void validateNotExist(String id);
+
+        TagEntity supplyTag(String id);
+
+        Optional<TagEntity> tryToFindTag(String id);
     }
 
     interface Write {
@@ -48,6 +53,16 @@ public interface TagDataSource {
         public void validateNotExist(String id) {
             if (jpaTagRepository.existsById(id))
                 throw exception(HttpStatus.BAD_REQUEST, "tag [%s] already exist", id);
+        }
+
+        @Override
+        public TagEntity supplyTag(String id) {
+            return jpaTagRepository.findById(id).orElseGet(() -> new TagEntity(id, 0L));
+        }
+
+        @Override
+        public Optional<TagEntity> tryToFindTag(String id) {
+            return jpaTagRepository.findById(id);
         }
     }
 
