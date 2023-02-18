@@ -42,7 +42,7 @@ public interface TaskController {
     @RequiredArgsConstructor
     @RestController
     @RequestMapping(BASE_URL_V1)
-    class Base implements TaskController {
+    class BaseTaskController implements TaskController {
 
         private final TaskService taskService;
 

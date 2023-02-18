@@ -26,7 +26,7 @@ public interface FileUploadController {
     @RequiredArgsConstructor
     @RestController
     @RequestMapping(BASE_URL_V1)
-    class Base implements FileUploadController {
+    class BaseFileUploadController implements FileUploadController {
 
         private final TaskFileService taskFileService;
 

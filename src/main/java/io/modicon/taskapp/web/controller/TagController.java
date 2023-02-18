@@ -36,7 +36,7 @@ public interface TagController {
     @RequiredArgsConstructor
     @RestController
     @RequestMapping(BASE_URL_V1)
-    class Base implements TagController {
+    class BaseTagController implements TagController {
 
         private final TagService tagService;
 
