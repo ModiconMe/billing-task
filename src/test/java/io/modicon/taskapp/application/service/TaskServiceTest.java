@@ -350,6 +350,18 @@ class TaskServiceTest {
     }
 
     @Test
+    void shouldNotGetCurrentTask_whenWrongDateFormatProvided() {
+        // given
+        String wrongDate = "2002-13-13";
+
+        // when
+        ApiException actual = catchThrowableOfType(() -> underTest.get(wrongDate, "0", "1", admin), ApiException.class);
+
+        // then
+        assertEquals(exception(HttpStatus.BAD_REQUEST, "wrong date format, please provide date like [yyyy-mm-dd]"), actual);
+    }
+
+    @Test
     void shouldGetUserAllTasks() {
         // given
         when(readUserTaskDataSource.findAllUserTasks("0", "1", creator)).thenReturn(List.of(commonTask));

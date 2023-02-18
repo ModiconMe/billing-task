@@ -149,7 +149,12 @@ public interface TaskService {
         @Transactional(readOnly = true)
         @Override
         public TaskGetByDateResponse get(String date, String page, String limit, UserEntity user) {
-            LocalDate parsedDate = LocalDate.parse(date);
+            LocalDate parsedDate;
+            try {
+                parsedDate = LocalDate.parse(date);
+            } catch (Exception e) {
+                throw exception(HttpStatus.BAD_REQUEST, "wrong date format, please provide date like [yyyy-mm-dd]");
+            }
 
             List<TaskEntity> tasks;
             if (user.getRole().equals(ApplicationUserRole.ADMIN))
