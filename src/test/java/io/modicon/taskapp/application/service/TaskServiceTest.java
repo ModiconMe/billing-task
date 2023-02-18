@@ -78,8 +78,8 @@ class TaskServiceTest {
                 .role(ApplicationUserRole.ADMIN)
                 .build();
         creatorDto = new UserDto(creator.getUsername());
-        tag = new TagEntity("tag", 1L);
-        tag1 = new TagEntity("tag1", 1L);
+        tag = new TagEntity("id", "tag", 1L);
+        tag1 = new TagEntity("id1", "tag1", 1L);
         importantTask = TaskEntity.builder()
                 .id("taskid1")
                 .tag(tag)

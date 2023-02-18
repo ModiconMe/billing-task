@@ -7,7 +7,6 @@ import io.modicon.taskapp.domain.model.TaskEntity;
 import io.modicon.taskapp.domain.model.UserEntity;
 import io.modicon.taskapp.domain.repository.TagDataSource;
 import io.modicon.taskapp.domain.repository.TaskDataSource;
-import io.modicon.taskapp.infrastructure.exception.ApiException;
 import io.modicon.taskapp.infrastructure.security.ApplicationUserRole;
 import io.modicon.taskapp.web.interaction.*;
 import lombok.RequiredArgsConstructor;
@@ -16,6 +15,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.UUID;
 
 import static io.modicon.taskapp.infrastructure.exception.ApiException.exception;
 
@@ -47,7 +47,7 @@ public interface TagService {
         @Transactional(readOnly = true)
         @Override
         public TagGetByIdWithTaskResponse getTagWithTasks(String tagName, String page, String limit) {
-            TagEntity tag = readTagDataSource.findById(tagName);
+            TagEntity tag = readTagDataSource.findByName(tagName);
 
             List<TaskEntity> tasks = readTaskDataSource.findByTag(tag, page, limit);
 
@@ -66,7 +66,7 @@ public interface TagService {
             String tagName = request.getTag();
             readTagDataSource.validateNotExist(tagName);
 
-            TagEntity tag = new TagEntity(tagName, 0L);
+            TagEntity tag = new TagEntity(UUID.randomUUID().toString(), tagName, 0L);
             writeTagDataSource.save(tag);
 
             return new TagCreateResponse(tagDtoMapper.apply(tag));
@@ -78,7 +78,7 @@ public interface TagService {
                 throw exception(HttpStatus.UNAUTHORIZED, "you are not allow to do this operation");
 
             String updatedTagName = request.getUpdatedTag();
-            TagEntity tag = readTagDataSource.findById(updatedTagName);
+            TagEntity tag = readTagDataSource.findByName(updatedTagName);
 
             String newTagName = request.getTag();
             readTagDataSource.validateNotExist(newTagName);
@@ -94,7 +94,7 @@ public interface TagService {
             if (!user.getRole().equals(ApplicationUserRole.ADMIN))
                 throw exception(HttpStatus.UNAUTHORIZED, "you are not allow to do this operation");
 
-            TagEntity tag = readTagDataSource.findById(tagName);
+            TagEntity tag = readTagDataSource.findByName(tagName);
 
             List<TaskEntity> tasks = readTaskDataSource.findByTag(tag);
             tasks.forEach(t -> taskFileService.deleteTaskFiles(t.getId()));

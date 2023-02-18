@@ -51,7 +51,7 @@ class TaskFileServiceTest {
                 .role(ApplicationUserRole.USER)
                 .build();
         creatorDto = new UserDto(creator.getUsername());
-        tag = new TagEntity("tag", 1L);
+        tag = new TagEntity("id", "tag", 1L);
         file = new FileData("id", "name", "type", "path");
         commonTask = TaskEntity.builder()
                 .id("taskid2")

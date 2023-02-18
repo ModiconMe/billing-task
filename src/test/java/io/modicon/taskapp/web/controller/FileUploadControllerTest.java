@@ -66,7 +66,7 @@ class FileUploadControllerTest {
         fileData = new FileData("id", "name", "text/plain", "path");
         commonTask = TaskEntity.builder()
                 .id("taskid2")
-                .tag(new TagEntity("tag", 1L))
+                .tag(new TagEntity("id1","tag", 1L))
                 .description("description")
                 .priorityType(PriorityType.COMMON)
                 .createdAt(LocalDate.now())

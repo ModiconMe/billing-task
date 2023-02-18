@@ -64,7 +64,7 @@ class TagControllerTest {
                 .username("username")
                 .password("password")
                 .build();
-        tag = new TagEntity("tag", 1L);
+        tag = new TagEntity("id1","tag", 1L);
         tagDto = new TagDto(tag.getTagName(), tag.getTaskCount());
         commonTask = TaskEntity.builder()
                 .id("taskid2")

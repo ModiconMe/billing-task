@@ -1,7 +1,6 @@
 package io.modicon.taskapp.domain.model;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 import lombok.*;
 
 @ToString
@@ -12,8 +11,10 @@ import lombok.*;
 @Entity
 public class TagEntity {
 
-    @EqualsAndHashCode.Include
     @Id
+    private String id;
+    @EqualsAndHashCode.Include
+    @Column(nullable = false, unique = true)
     private String tagName;
     private Long taskCount;
 

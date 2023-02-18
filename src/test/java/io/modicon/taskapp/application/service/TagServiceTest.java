@@ -27,6 +27,7 @@ import java.util.List;
 import static io.modicon.taskapp.infrastructure.exception.ApiException.exception;
 import static org.assertj.core.api.AssertionsForClassTypes.catchThrowableOfType;
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -59,8 +60,6 @@ class TagServiceTest {
     private final UserEntity creator;
     private final UserEntity admin;
     private final UserDto creatorDto;
-    private final TaskEntity urgentTask;
-    private final TaskEntity importantTask;
     private final TaskEntity commonTask;
     private final TagEntity tag;
     private final TagDto tagDto;
@@ -79,18 +78,9 @@ class TagServiceTest {
                 .role(ApplicationUserRole.ADMIN)
                 .build();
         creatorDto = new UserDto(creator.getUsername());
-        tag = new TagEntity("tag", 1L);
-        tag1 = new TagEntity("tag1", 1L);
+        tag = new TagEntity("id", "name", 1L);
+        tag1 = new TagEntity("id1", "name1", 1L);
         tagDto = new TagDto(tag.getTagName(), tag.getTaskCount());
-        importantTask = TaskEntity.builder()
-                .id("taskid1")
-                .tag(tag)
-                .description("description")
-                .priorityType(PriorityType.IMPORTANT)
-                .createdAt(LocalDate.now())
-                .finishDate(LocalDate.now())
-                .creator(creator)
-                .build();
         commonTask = TaskEntity.builder()
                 .id("taskid2")
                 .tag(tag)
@@ -98,15 +88,6 @@ class TagServiceTest {
                 .priorityType(PriorityType.COMMON)
                 .createdAt(LocalDate.now())
                 .finishDate(LocalDate.now())
-                .build();
-        urgentTask = TaskEntity.builder()
-                .id("taskid3")
-                .tag(tag)
-                .description("description")
-                .priorityType(PriorityType.URGENT)
-                .createdAt(LocalDate.now())
-                .finishDate(LocalDate.now())
-                .creator(creator)
                 .build();
         taskDto = TaskDto.builder()
                 .id(commonTask.getId())
@@ -122,7 +103,7 @@ class TagServiceTest {
     @Test
     void shouldGetTagWithTasks() {
         // given
-        when(readTagDataSource.findById(tag.getTagName())).thenReturn(tag);
+        when(readTagDataSource.findByName(tag.getTagName())).thenReturn(tag);
         when(readUserTaskDataSource.findByTag(tag, "0", "1")).thenReturn(List.of(commonTask));
         when(tagDtoMapper.apply(tag)).thenReturn(tagDto);
         when(taskDtoMapper.apply(commonTask)).thenReturn(taskDto);
@@ -169,7 +150,7 @@ class TagServiceTest {
     void shouldUpdateByAdmin() {
         // given
         when(tagDtoMapper.apply(tag)).thenReturn(tagDto);
-        when(readTagDataSource.findById(tag.getTagName())).thenReturn(tag);
+        when(readTagDataSource.findByName(tag.getTagName())).thenReturn(tag);
 
         // when
         TagUpdateResponse actual = underTest.update(new TagUpdateRequest(admin, tag.getTagName(), tag1.getTagName()));
@@ -196,7 +177,7 @@ class TagServiceTest {
     void shouldDeleteByAdmin() {
         // given
         when(tagDtoMapper.apply(tag)).thenReturn(tagDto);
-        when(readTagDataSource.findById(tag.getTagName())).thenReturn(tag);
+        when(readTagDataSource.findByName(tag.getTagName())).thenReturn(tag);
         when(readUserTaskDataSource.findByTag(tag)).thenReturn(List.of(commonTask));
 
         // when

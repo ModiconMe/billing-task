@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 import static io.modicon.taskapp.infrastructure.exception.ApiException.exception;
 
@@ -16,13 +17,13 @@ public interface TagDataSource {
 
         List<TagEntity> findTagWithTasks(Long taskCount);
 
-        TagEntity findById(String id);
+        TagEntity findByName(String name);
 
-        void validateNotExist(String id);
+        void validateNotExist(String name);
 
-        TagEntity supplyTag(String id);
+        TagEntity supplyTag(String name);
 
-        Optional<TagEntity> tryToFindTag(String id);
+        Optional<TagEntity> tryToFindTag(String name);
     }
 
     interface Write {
@@ -44,25 +45,25 @@ public interface TagDataSource {
         }
 
         @Override
-        public TagEntity findById(String id) {
-            return jpaTagRepository.findById(id)
-                    .orElseThrow(() -> exception(HttpStatus.NOT_FOUND, "tag [%s] not found", id));
+        public TagEntity findByName(String name) {
+            return jpaTagRepository.findByTagName(name)
+                    .orElseThrow(() -> exception(HttpStatus.NOT_FOUND, "tag [%s] not found", name));
         }
 
         @Override
-        public void validateNotExist(String id) {
-            if (jpaTagRepository.existsById(id))
-                throw exception(HttpStatus.BAD_REQUEST, "tag [%s] already exist", id);
+        public void validateNotExist(String name) {
+            if (jpaTagRepository.existsByTagName(name))
+                throw exception(HttpStatus.BAD_REQUEST, "tag [%s] already exist", name);
         }
 
         @Override
-        public TagEntity supplyTag(String id) {
-            return jpaTagRepository.findById(id).orElseGet(() -> new TagEntity(id, 0L));
+        public TagEntity supplyTag(String name) {
+            return jpaTagRepository.findById(name).orElseGet(() -> new TagEntity(UUID.randomUUID().toString(), name, 0L));
         }
 
         @Override
-        public Optional<TagEntity> tryToFindTag(String id) {
-            return jpaTagRepository.findById(id);
+        public Optional<TagEntity> tryToFindTag(String name) {
+            return jpaTagRepository.findByTagName(name);
         }
     }
 

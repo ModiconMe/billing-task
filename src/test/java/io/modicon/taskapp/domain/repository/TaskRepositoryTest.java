@@ -40,7 +40,7 @@ class TaskRepositoryTest {
                 .password("password")
                 .role(ApplicationUserRole.USER)
                 .build();
-        tag = new TagEntity("tag", 1L);
+        tag = new TagEntity("id","tag", 1L);
         importantTask = TaskEntity.builder()
                 .id("taskid1")
                 .tag(tag)

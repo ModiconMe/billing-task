@@ -13,7 +13,7 @@ class TagDtoMapperTest {
     @Test
     void shouldMap() {
         // given
-        TagEntity tag = new TagEntity("tag", 1L);
+        TagEntity tag = new TagEntity("id", "name", 1L);
 
         // when
         TagDto actual = underTest.apply(tag);

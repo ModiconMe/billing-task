@@ -18,10 +18,10 @@ class TagRepositoryTest {
     @Test
     void shouldGetTagWhichTaskCounterGreaterThan0() {
         // given
-        TagEntity tag1 = new TagEntity("tag1", 0L);
-        TagEntity tag2 = new TagEntity("tag2", 2L);
-        TagEntity tag3 = new TagEntity("tag3", 100L);
-        TagEntity tag4 = new TagEntity("tag4", -100L);
+        TagEntity tag1 = new TagEntity("id1","tag1", 0L);
+        TagEntity tag2 = new TagEntity("id2","tag2", 2L);
+        TagEntity tag3 = new TagEntity("id3","tag3", 100L);
+        TagEntity tag4 = new TagEntity("id4","tag4", -100L);
 
         tagRepository.saveAll(List.of(tag1, tag2, tag3, tag4));
 

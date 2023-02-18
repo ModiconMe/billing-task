@@ -43,7 +43,7 @@ class TaskDtoMapperTest {
 
         TaskEntity task = TaskEntity.builder()
                 .id("taskid")
-                .tag(new TagEntity("tag", 1L))
+                .tag(new TagEntity("id", "name", 1L))
                 .description("description")
                 .priorityType(PriorityType.COMMON)
                 .createdAt(LocalDate.now())

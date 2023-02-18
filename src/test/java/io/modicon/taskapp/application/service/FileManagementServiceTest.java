@@ -70,7 +70,7 @@ class FileManagementServiceTest {
                 .role(ApplicationUserRole.USER)
                 .build();
         creatorDto = new UserDto(creator.getUsername());
-        tag = new TagEntity("tag", 1L);
+        tag = new TagEntity("id", "name", 1L);
         fileData = new FileData("id", "name", "type", "path");
         commonTask = TaskEntity.builder()
                 .id("taskid2")

@@ -103,7 +103,7 @@ public interface TaskService {
                         writeTagDataSource.save(task.getTag());
                     }
                 } else {
-                    tag = new TagEntity(request.getTag(), 0L);
+                    tag = new TagEntity(UUID.randomUUID().toString(), request.getTag(), 0L);
                     tag.addTask();
                 }
             }

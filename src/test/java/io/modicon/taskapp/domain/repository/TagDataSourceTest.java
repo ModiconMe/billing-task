@@ -37,9 +37,6 @@ class TagDataSourceTest {
     }
 
     private final UserEntity creator;
-    private final TaskEntity urgentTask;
-    private final TaskEntity importantTask;
-    private final TaskEntity commonTask;
     private final TagEntity tag;
 
     {
@@ -47,33 +44,7 @@ class TagDataSourceTest {
                 .username("username")
                 .password("password")
                 .build();
-        tag = new TagEntity("tag", 0L);
-        importantTask = TaskEntity.builder()
-                .id("taskid1")
-                .tag(tag)
-                .description("description")
-                .priorityType(PriorityType.IMPORTANT)
-                .createdAt(LocalDate.now())
-                .finishDate(LocalDate.now())
-                .creator(creator)
-                .build();
-        commonTask = TaskEntity.builder()
-                .id("taskid2")
-                .tag(tag)
-                .description("description")
-                .priorityType(PriorityType.COMMON)
-                .createdAt(LocalDate.now())
-                .finishDate(LocalDate.now())
-                .build();
-        urgentTask = TaskEntity.builder()
-                .id("taskid3")
-                .tag(tag)
-                .description("description")
-                .priorityType(PriorityType.URGENT)
-                .createdAt(LocalDate.now())
-                .finishDate(LocalDate.now())
-                .creator(creator)
-                .build();
+        tag = new TagEntity("id", "tag", 0L);
     }
 
     @Test
@@ -92,10 +63,10 @@ class TagDataSourceTest {
     @Test
     void shouldFindTagById() {
         // given
-        when(jpaTagRepository.findById(tag.getTagName())).thenReturn(Optional.of(tag));
+        when(jpaTagRepository.findByTagName(tag.getTagName())).thenReturn(Optional.of(tag));
 
         // when
-        TagEntity actual = readUnderTest.findById(tag.getTagName());
+        TagEntity actual = readUnderTest.findByName(tag.getTagName());
 
         // then
         assertEquals(tag, actual);
@@ -104,10 +75,10 @@ class TagDataSourceTest {
     @Test
     void shouldNotFindTagById_whenTaskDoesNotExist() {
         // given
-        when(jpaTagRepository.findById(tag.getTagName())).thenReturn(Optional.empty());
+        when(jpaTagRepository.findByTagName(tag.getTagName())).thenReturn(Optional.empty());
 
         // when
-        ApiException actual = catchThrowableOfType(() -> readUnderTest.findById(tag.getTagName()), ApiException.class);
+        ApiException actual = catchThrowableOfType(() -> readUnderTest.findByName(tag.getTagName()), ApiException.class);
 
         // then
         assertEquals(exception(HttpStatus.NOT_FOUND, "tag [%s] not found", tag.getTagName()), actual);
@@ -116,7 +87,7 @@ class TagDataSourceTest {
     @Test
     void shouldValidateTaskNotExist_whenTaskNotExist() {
         // given
-        when(jpaTagRepository.existsById(tag.getTagName())).thenReturn(false);
+        when(jpaTagRepository.existsByTagName(tag.getTagName())).thenReturn(false);
 
         // when
         // then
@@ -126,7 +97,7 @@ class TagDataSourceTest {
     @Test
     void shouldValidateTaskNotExist_whenTaskExist() {
         // given
-        when(jpaTagRepository.existsById(tag.getTagName())).thenReturn(true);
+        when(jpaTagRepository.existsByTagName(tag.getTagName())).thenReturn(true);
 
         // when
         ApiException actual = catchThrowableOfType(() -> readUnderTest.validateNotExist(tag.getTagName()), ApiException.class);
@@ -182,7 +153,7 @@ class TagDataSourceTest {
     @Test
     void shouldTryToFindTag_whenTagExist() {
         // given
-        when(jpaTagRepository.findById(tag.getTagName())).thenReturn(Optional.of(tag));
+        when(jpaTagRepository.findByTagName(tag.getTagName())).thenReturn(Optional.of(tag));
 
         // when
         Optional<TagEntity> actual = readUnderTest.tryToFindTag(tag.getTagName());
@@ -194,7 +165,7 @@ class TagDataSourceTest {
     @Test
     void shouldTryToFindTag_whenTagNotExist() {
         // given
-        when(jpaTagRepository.findById(tag.getTagName())).thenReturn(Optional.empty());
+        when(jpaTagRepository.findByTagName(tag.getTagName())).thenReturn(Optional.empty());
 
         // when
         Optional<TagEntity> actual = readUnderTest.tryToFindTag(tag.getTagName());
