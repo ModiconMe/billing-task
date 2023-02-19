@@ -129,7 +129,7 @@ class TagDataSourceTest {
     @Test
     void shouldSupplyTag_whenTagExist() {
         // given
-        when(jpaTagRepository.findById(tag.getTagName())).thenReturn(Optional.of(tag));
+        when(jpaTagRepository.findByTagName(tag.getTagName())).thenReturn(Optional.of(tag));
 
         // when
         TagEntity actual = readUnderTest.supplyTag(tag.getTagName());
@@ -141,7 +141,7 @@ class TagDataSourceTest {
     @Test
     void shouldSupplyTag_whenTagNotExist() {
         // given
-        when(jpaTagRepository.findById(tag.getTagName())).thenReturn(Optional.empty());
+        when(jpaTagRepository.findByTagName(tag.getTagName())).thenReturn(Optional.empty());
 
         // when
         TagEntity actual = readUnderTest.supplyTag(tag.getTagName());

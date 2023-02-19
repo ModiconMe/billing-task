@@ -172,7 +172,7 @@ class TagServiceTest {
                 ApiException.class);
 
         // then
-        assertEquals(exception(HttpStatus.UNAUTHORIZED, "you are not allow to do this operation"), actual);
+        assertEquals(exception(HttpStatus.FORBIDDEN, "you are not allow to do this operation"), actual);
     }
 
     @Test
@@ -200,7 +200,7 @@ class TagServiceTest {
         ApiException actual = catchThrowableOfType(() -> underTest.delete(tag.getTagName(), creator), ApiException.class);
 
         // then
-        assertEquals(exception(HttpStatus.UNAUTHORIZED, "you are not allow to do this operation"), actual);
+        assertEquals(exception(HttpStatus.FORBIDDEN, "you are not allow to do this operation"), actual);
 
     }
 }

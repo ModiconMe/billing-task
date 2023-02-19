@@ -1,7 +1,6 @@
-package io.modicon.taskapp.rest.utils;
+package io.modicon.taskapp.utils;
 
-import io.modicon.taskapp.infrastructure.security.ApplicationUserRole;
-import io.modicon.taskapp.rest.client.UserClient;
+import io.modicon.taskapp.client.UserClient;
 import io.modicon.taskapp.web.interaction.UserLoginRequest;
 import io.modicon.taskapp.web.interaction.UserLoginResponse;
 import io.modicon.taskapp.web.interaction.UserRegisterRequest;
@@ -9,7 +8,6 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 
 import java.util.UUID;

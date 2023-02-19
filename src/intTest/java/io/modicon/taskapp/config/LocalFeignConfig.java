@@ -1,7 +1,6 @@
-package io.modicon.taskapp.rest.config;
+package io.modicon.taskapp.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import feign.Client;
 import feign.Feign;
@@ -11,7 +10,7 @@ import feign.codec.Decoder;
 import feign.codec.Encoder;
 import feign.jackson.JacksonDecoder;
 import feign.jackson.JacksonEncoder;
-import io.modicon.taskapp.rest.utils.AuthUtils;
+import io.modicon.taskapp.utils.AuthUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

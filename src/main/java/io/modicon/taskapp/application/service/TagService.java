@@ -80,7 +80,7 @@ public interface TagService {
         @Override
         public TagUpdateResponse update(TagUpdateRequest request) {
             if (!request.getUser().getRole().equals(ApplicationUserRole.ADMIN))
-                throw exception(HttpStatus.UNAUTHORIZED, "you are not allow to do this operation");
+                throw exception(HttpStatus.FORBIDDEN, "you are not allow to do this operation");
 
             String updatedTagName = request.getUpdatedTag();
             TagEntity tag = readTagDataSource.findByName(updatedTagName);
@@ -97,7 +97,7 @@ public interface TagService {
         @Override
         public TagDeleteResponse delete(String tagName, UserEntity user) {
             if (!user.getRole().equals(ApplicationUserRole.ADMIN))
-                throw exception(HttpStatus.UNAUTHORIZED, "you are not allow to do this operation");
+                throw exception(HttpStatus.FORBIDDEN, "you are not allow to do this operation");
 
             TagEntity tag = readTagDataSource.findByName(tagName);
 

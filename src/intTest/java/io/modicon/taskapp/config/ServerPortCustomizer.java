@@ -1,4 +1,4 @@
-package io.modicon.taskapp.rest.config;
+package io.modicon.taskapp.config;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.web.server.ConfigurableWebServerFactory;

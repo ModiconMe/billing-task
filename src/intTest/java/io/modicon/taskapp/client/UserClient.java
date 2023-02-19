@@ -1,6 +1,6 @@
-package io.modicon.taskapp.rest.client;
+package io.modicon.taskapp.client;
 
-import io.modicon.taskapp.rest.config.LocalFeignConfig;
+import io.modicon.taskapp.config.LocalFeignConfig;
 import io.modicon.taskapp.web.controller.AuthUserController;
 import org.springframework.cloud.openfeign.FeignClient;
 

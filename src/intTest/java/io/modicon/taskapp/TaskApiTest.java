@@ -1,10 +1,10 @@
-package io.modicon.taskapp.rest;
+package io.modicon.taskapp;
 
 import feign.FeignException;
 import io.modicon.taskapp.domain.model.PriorityType;
-import io.modicon.taskapp.rest.client.TaskClient;
-import io.modicon.taskapp.rest.config.FeignBasedRestTest;
-import io.modicon.taskapp.rest.utils.AuthUtils;
+import io.modicon.taskapp.client.TaskClient;
+import io.modicon.taskapp.config.FeignBasedRestTest;
+import io.modicon.taskapp.utils.AuthUtils;
 import io.modicon.taskapp.web.interaction.TaskCreateRequest;
 import io.modicon.taskapp.web.interaction.TaskCreateResponse;
 import io.modicon.taskapp.web.interaction.TaskUpdateRequest;

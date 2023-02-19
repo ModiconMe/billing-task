@@ -60,7 +60,7 @@ public interface TagDataSource {
 
         @Override
         public TagEntity supplyTag(String name) {
-            return jpaTagRepository.findById(name).orElseGet(() -> new TagEntity(UUID.randomUUID().toString(), name, 0L));
+            return jpaTagRepository.findByTagName(name).orElseGet(() -> new TagEntity(UUID.randomUUID().toString(), name, 0L));
         }
 
         @Override
