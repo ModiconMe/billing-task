@@ -81,7 +81,7 @@ public interface TaskDataSource {
 
         @Override
         public List<TaskEntity> findCurrentTask(LocalDate finishDate, String page, String limit, UserEntity creator) {
-            return jpaTaskRepository.findByFinishDateGreaterThanEqualAndCreator(finishDate, creator,
+            return jpaTaskRepository.findByFinishDateAndCreator(finishDate, creator,
                     taskSortingDispatcher.getPage(page, limit));
         }
 
@@ -107,7 +107,7 @@ public interface TaskDataSource {
 
         @Override
         public List<TaskEntity> findCurrentTask(LocalDate finishDate, String page, String limit) {
-            return jpaTaskRepository.findByFinishDateGreaterThanEqual(finishDate,
+            return jpaTaskRepository.findByFinishDate(finishDate,
                     taskSortingDispatcher.getPage(page, limit));
         }
 

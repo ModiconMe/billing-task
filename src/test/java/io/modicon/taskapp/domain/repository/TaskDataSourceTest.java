@@ -219,7 +219,7 @@ class TaskDataSourceTest {
         LocalDate date = LocalDate.now();
         PageRequest pageable = PageRequest.of(0, 1, Sort.by(fieldToSort.get().getName()));
         when(taskSortingDispatcher.getPage("0", "1")).thenReturn(pageable);
-        when(jpaTaskRepository.findByFinishDateGreaterThanEqual(date, pageable)).thenReturn(List.of(commonTask));
+        when(jpaTaskRepository.findByFinishDate(date, pageable)).thenReturn(List.of(commonTask));
 
         // when
         List<TaskEntity> actual = readAdminUnderTest.findCurrentTask(date, "0", "1");
@@ -234,7 +234,7 @@ class TaskDataSourceTest {
         LocalDate date = LocalDate.now();
         PageRequest pageable = PageRequest.of(0, 1);
         when(taskSortingDispatcher.getPage("0", "1")).thenReturn(pageable);
-        when(jpaTaskRepository.findByFinishDateGreaterThanEqual(date, pageable)).thenReturn(List.of(commonTask));
+        when(jpaTaskRepository.findByFinishDate(date, pageable)).thenReturn(List.of(commonTask));
 
         // when
         List<TaskEntity> actual = readAdminUnderTest.findCurrentTask(date, "0", "1");
@@ -337,7 +337,7 @@ class TaskDataSourceTest {
         PageRequest pageable = PageRequest.of(0, 1);
         when(taskSortingDispatcher.getPage("0", "1")).thenReturn(pageable);
         List<TaskEntity> expected = List.of(commonTask);
-        when(jpaTaskRepository.findByFinishDateGreaterThanEqualAndCreator(date, creator, pageable)).thenReturn(expected);
+        when(jpaTaskRepository.findByFinishDateAndCreator(date, creator, pageable)).thenReturn(expected);
 
         // when
         List<TaskEntity> actual = readUserUnderTest.findCurrentTask(date, "0", "1", creator);

@@ -21,9 +21,9 @@ public interface JpaTaskRepository extends JpaRepository<TaskEntity, String> {
 
     List<TaskEntity> findByTag(TagEntity tag, Pageable pageable);
 
-    List<TaskEntity> findByFinishDateGreaterThanEqual(LocalDate finishDate, Pageable pageable);
+    List<TaskEntity> findByFinishDate(LocalDate finishDate, Pageable pageable);
 
-    List<TaskEntity> findByFinishDateGreaterThanEqualAndCreator(LocalDate finishDate, UserEntity creator, Pageable pageable);
+    List<TaskEntity> findByFinishDateAndCreator(LocalDate finishDate, UserEntity creator, Pageable pageable);
 
     List<TaskEntity> findAllByCreator(UserEntity creator, Pageable pageable);
 }
