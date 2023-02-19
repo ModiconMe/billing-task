@@ -23,7 +23,7 @@ public interface FileUploadController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successfully return data",
                     content = { @Content(mediaType = "application/json",
-                            schema = @Schema(implementation = TaskCreateResponse.class)) }),
+                            schema = @Schema(implementation = TaskFileListResponse.class)) }),
             @ApiResponse(responseCode = "404", description = "task not found",
                     content = { @Content(mediaType = "application/json",
                             schema = @Schema(implementation = ApiExceptionDto.class)) }),
@@ -37,7 +37,7 @@ public interface FileUploadController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successfully return data",
                     content = { @Content(mediaType = "application/json",
-                            schema = @Schema(implementation = TaskCreateResponse.class)) }),
+                            schema = @Schema(implementation = TaskFileUploadResponse.class)) }),
             @ApiResponse(responseCode = "404", description = "task not found",
                     content = { @Content(mediaType = "application/json",
                             schema = @Schema(implementation = ApiExceptionDto.class)) }),
@@ -53,8 +53,7 @@ public interface FileUploadController {
     @Operation(summary = "upload file")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successfully return data",
-                    content = { @Content(mediaType = "application/json",
-                            schema = @Schema(implementation = TaskCreateResponse.class)) }),
+                    content = { @Content(mediaType = "application/json")}),
             @ApiResponse(responseCode = "404", description = "task or file not found",
                     content = { @Content(mediaType = "application/json",
                             schema = @Schema(implementation = ApiExceptionDto.class)) }),
