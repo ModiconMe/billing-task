@@ -1,0 +1,40 @@
+server:
+  port: 8080
+
+springdoc:
+  api-docs:
+    path: /api-docs
+
+spring:
+  datasource:
+    username: ${POSTGRES_USER}
+    url: ${POSTGRES_URL}
+    password: ${POSTGRES_PASSWORD}
+  jpa:
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: true
+    show-sql: true
+
+  cache:
+    caffeine:
+      spec: maximumSize=48, expireAfterAccess=1m
+
+  servlet:
+    multipart:
+      enabled: true
+      file-size-threshold: 2KB
+      max-file-size: 200MB
+      max-request-size: 215MB
+
+file:
+  upload-dir: /taskapp/uploads
+
+jwt:
+  sign-key: ${JWT_SECRET}
+  token-prefix: Bearer
+  access-valid-time: 1
+  issuer: Billing
