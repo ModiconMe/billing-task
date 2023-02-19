@@ -1,0 +1,30 @@
+services:
+  billing-app:
+    image: modiconme/billing:latest
+    container_name: billing-app
+    ports:
+      - "8080:8080"
+    networks:
+      - billing-app-network
+    environment:
+      - "SPRING_PROFILES_ACTIVE=docker"
+    depends_on:
+      - postgres
+    restart: unless-stopped
+
+  postgres:
+    image: postgres
+    container_name: postgres
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: root
+      PGDATA: /data/postgres
+    ports:
+      - "5432:5432"
+    networks:
+      - billing-app-network
+    restart: unless-stopped
+
+networks:
+  billing-app-network:
+    driver: bridge
