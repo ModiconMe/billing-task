@@ -280,7 +280,7 @@ public class TagApiTest extends FeignBasedRestTest {
         var request = new TaskCreateRequest(
                 null, UUID.randomUUID().toString(),
                 type.name(), UUID.randomUUID().toString(),
-                LocalDate.now(), tag
+                LocalDate.now().toString(), tag
         );
         TaskCreateResponse response = taskClient.create(request);
 

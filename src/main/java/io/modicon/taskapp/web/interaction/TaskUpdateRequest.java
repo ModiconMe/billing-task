@@ -24,6 +24,6 @@ public class TaskUpdateRequest {
 
     private String priorityType;
     private String description;
-    private LocalDate finishDate;
+    private String finishDate;
     private String tag;
 }

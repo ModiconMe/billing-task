@@ -129,7 +129,7 @@ class TaskServiceTest {
                 commonTask.getId(),
                 commonTask.getPriorityType().name(),
                 commonTask.getDescription(),
-                commonTask.getFinishDate(),
+                commonTask.getFinishDate().toString(),
                 commonTask.getTag().getTagName()));
 
         // then
@@ -147,7 +147,7 @@ class TaskServiceTest {
                 commonTask.getId(),
                 commonTask.getPriorityType().name(),
                 commonTask.getDescription(),
-                commonTask.getFinishDate(),
+                commonTask.getFinishDate().toString(),
                 commonTask.getTag().getTagName())), ApiException.class);
 
         // then
@@ -162,11 +162,26 @@ class TaskServiceTest {
                 commonTask.getId(),
                 commonTask.getPriorityType().name(),
                 commonTask.getDescription(),
-                LocalDate.now().minusDays(1),
+                LocalDate.now().minusDays(1).toString(),
                 commonTask.getTag().getTagName())), ApiException.class);
 
         // then
         assertEquals(exception(HttpStatus.BAD_REQUEST, "finish date cannot be earlier than today's date"), actual);
+    }
+
+    @Test
+    void shouldNotCreate_whenWrongFormatFinishDateProvided() {
+        // given
+        // when
+        ApiException actual = catchThrowableOfType(() -> underTest.create(new TaskCreateRequest(creator,
+                commonTask.getId(),
+                commonTask.getPriorityType().name(),
+                commonTask.getDescription(),
+                "wrong format",
+                commonTask.getTag().getTagName())), ApiException.class);
+
+        // then
+        assertEquals(exception(HttpStatus.BAD_REQUEST, "wrong date format, please provide yyyy-mm-dd"), actual);
     }
 
     @Test
@@ -179,7 +194,7 @@ class TaskServiceTest {
                 commonTask.getId(),
                 "wrong priority type",
                 commonTask.getDescription(),
-                commonTask.getFinishDate(),
+                commonTask.getFinishDate().toString(),
                 commonTask.getTag().getTagName())), ApiException.class);
 
         // then
@@ -198,7 +213,7 @@ class TaskServiceTest {
         TaskUpdateResponse actual = underTest.update(commonTask.getId(), new TaskUpdateRequest(creator,
                 commonTask.getPriorityType().name(),
                 commonTask.getDescription(),
-                commonTask.getFinishDate(),
+                commonTask.getFinishDate().toString(),
                 commonTask.getTag().getTagName()));
 
         // then
@@ -217,7 +232,7 @@ class TaskServiceTest {
         TaskUpdateResponse actual = underTest.update(commonTask.getId(), new TaskUpdateRequest(creator,
                 commonTask.getPriorityType().name(),
                 commonTask.getDescription(),
-                commonTask.getFinishDate(),
+                commonTask.getFinishDate().toString(),
                 commonTask.getTag().getTagName()));
 
         // then
@@ -236,7 +251,7 @@ class TaskServiceTest {
         TaskUpdateResponse actual = underTest.update(commonTask.getId(), new TaskUpdateRequest(creator,
                 commonTask.getPriorityType().name(),
                 commonTask.getDescription(),
-                commonTask.getFinishDate(),
+                commonTask.getFinishDate().toString(),
                 commonTask.getTag().getTagName()));
 
         // then
@@ -255,7 +270,7 @@ class TaskServiceTest {
         TaskUpdateResponse actual = underTest.update(commonTask.getId(), new TaskUpdateRequest(admin,
                 commonTask.getPriorityType().name(),
                 commonTask.getDescription(),
-                commonTask.getFinishDate(),
+                commonTask.getFinishDate().toString(),
                 commonTask.getTag().getTagName()));
 
         // then
@@ -271,11 +286,25 @@ class TaskServiceTest {
         ApiException actual = catchThrowableOfType(() -> underTest.update(commonTask.getId(), new TaskUpdateRequest(creator,
                 commonTask.getPriorityType().name(),
                 commonTask.getDescription(),
-                LocalDate.now().minusDays(1),
+                LocalDate.now().minusDays(1).toString(),
                 commonTask.getTag().getTagName())), ApiException.class);
 
         // then
         assertEquals(exception(HttpStatus.BAD_REQUEST, "finish date cannot be earlier than today's date"), actual);
+    }
+
+    @Test
+    void shouldNotUpdate_whenWrongFormatFinishDateProvided() {
+        // given
+        // when
+        ApiException actual = catchThrowableOfType(() -> underTest.update(commonTask.getId(), new TaskUpdateRequest(creator,
+                commonTask.getPriorityType().name(),
+                commonTask.getDescription(),
+                "wrong format",
+                commonTask.getTag().getTagName())), ApiException.class);
+
+        // then
+        assertEquals(exception(HttpStatus.BAD_REQUEST, "wrong date format, please provide yyyy-mm-dd"), actual);
     }
 
     @Test
@@ -288,7 +317,7 @@ class TaskServiceTest {
         ApiException actual = catchThrowableOfType(() -> underTest.update(commonTask.getId(), new TaskUpdateRequest(creator,
                 "wrong priority type",
                 commonTask.getDescription(),
-                commonTask.getFinishDate(),
+                commonTask.getFinishDate().toString(),
                 commonTask.getTag().getTagName())), ApiException.class);
 
         // then

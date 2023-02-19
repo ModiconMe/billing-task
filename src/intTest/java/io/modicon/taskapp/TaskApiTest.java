@@ -30,7 +30,7 @@ public class TaskApiTest extends FeignBasedRestTest {
 
     private static final String UPDATED_DESCRIPTION = "new description";
     private static final String UPDATED_PRIORITY_TYPE = PriorityType.URGENT.name();
-    private static final LocalDate UPDATED_FINISH_DATE = LocalDate.now().plusDays(2);
+    private static final String UPDATED_FINISH_DATE = LocalDate.now().plusDays(2).toString();
     private static final String UPDATED_TAG = "new tag";
 
     @Test
@@ -64,7 +64,22 @@ public class TaskApiTest extends FeignBasedRestTest {
         var request = new TaskCreateRequest(
                 null, UUID.randomUUID().toString(),
                 PriorityType.COMMON.name(), UUID.randomUUID().toString(),
-                LocalDate.now().minusDays(1), UUID.randomUUID().toString());
+                LocalDate.now().minusDays(1).toString(), UUID.randomUUID().toString());
+
+        FeignException exception = catchThrowableOfType(() -> taskClient.create(request), FeignException.class);
+
+        assertThat(exception.status()).isEqualTo(HttpStatus.BAD_REQUEST.value());
+        assertThat(exception.contentUTF8()).isNotEmpty();
+    }
+
+    @Test
+    void CREATE_TASK_should_return400_whenWrongFormatDateProvided() {
+        auth.register().login();
+
+        var request = new TaskCreateRequest(
+                null, UUID.randomUUID().toString(),
+                PriorityType.COMMON.name(), UUID.randomUUID().toString(),
+                WRONG, UUID.randomUUID().toString());
 
         FeignException exception = catchThrowableOfType(() -> taskClient.create(request), FeignException.class);
 
@@ -79,7 +94,7 @@ public class TaskApiTest extends FeignBasedRestTest {
         var request = new TaskCreateRequest(
                 null, UUID.randomUUID().toString(),
                 PriorityType.COMMON.name() + WRONG, UUID.randomUUID().toString(),
-                LocalDate.now(), UUID.randomUUID().toString());
+                LocalDate.now().toString(), UUID.randomUUID().toString());
 
         FeignException exception = catchThrowableOfType(() -> taskClient.create(request), FeignException.class);
 
@@ -179,7 +194,27 @@ public class TaskApiTest extends FeignBasedRestTest {
         assertThat(createdTask.getTask().tag()).isEqualTo(request.getTag());
 
         FeignException exception = catchThrowableOfType(() -> taskClient.update(request.getId(), new TaskUpdateRequest(null, UPDATED_PRIORITY_TYPE,
-                UPDATED_DESCRIPTION, LocalDate.now().minusDays(1), UPDATED_TAG)), FeignException.class);
+                UPDATED_DESCRIPTION, LocalDate.now().minusDays(1).toString(), UPDATED_TAG)), FeignException.class);
+
+        assertThat(exception.status()).isEqualTo(HttpStatus.BAD_REQUEST.value());
+        assertThat(exception.contentUTF8()).isNotEmpty();
+    }
+
+    @Test
+    void UPDATE_TASK_should_return400_whenWrongFormatDateProvided() {
+        auth.register().login();
+
+        var request = createTask();
+
+        var createdTask = taskClient.create(request);
+        assertThat(createdTask.getTask().id()).isEqualTo(request.getId());
+        assertThat(createdTask.getTask().description()).isEqualTo(request.getDescription());
+        assertThat(createdTask.getTask().finishDate()).isEqualTo(request.getFinishDate());
+        assertThat(createdTask.getTask().priorityType()).isEqualTo(request.getPriorityType());
+        assertThat(createdTask.getTask().tag()).isEqualTo(request.getTag());
+
+        FeignException exception = catchThrowableOfType(() -> taskClient.update(request.getId(), new TaskUpdateRequest(null, UPDATED_PRIORITY_TYPE,
+                UPDATED_DESCRIPTION, WRONG, UPDATED_TAG)), FeignException.class);
 
         assertThat(exception.status()).isEqualTo(HttpStatus.BAD_REQUEST.value());
         assertThat(exception.contentUTF8()).isNotEmpty();
@@ -383,7 +418,7 @@ public class TaskApiTest extends FeignBasedRestTest {
         var requestCommon = new TaskCreateRequest(
                 null, UUID.randomUUID().toString(),
                 PriorityType.COMMON.name(), UUID.randomUUID().toString(),
-                LocalDate.now(), UUID.randomUUID().toString());
+                LocalDate.now().toString(), UUID.randomUUID().toString());
         var createdCommonTask = taskClient.create(requestCommon);
         assertThat(createdCommonTask.getTask().id()).isEqualTo(requestCommon.getId());
         assertThat(createdCommonTask.getTask().description()).isEqualTo(requestCommon.getDescription());
@@ -394,7 +429,7 @@ public class TaskApiTest extends FeignBasedRestTest {
         var requestUrgent = new TaskCreateRequest(
                 null, UUID.randomUUID().toString(),
                 PriorityType.URGENT.name(), UUID.randomUUID().toString(),
-                LocalDate.now(), UUID.randomUUID().toString());
+                LocalDate.now().toString(), UUID.randomUUID().toString());
         var createdUrgentTask = taskClient.create(requestUrgent);
         assertThat(createdUrgentTask.getTask().id()).isEqualTo(requestUrgent.getId());
         assertThat(createdUrgentTask.getTask().description()).isEqualTo(requestUrgent.getDescription());
@@ -405,7 +440,7 @@ public class TaskApiTest extends FeignBasedRestTest {
         var requestImportant = new TaskCreateRequest(
                 null, UUID.randomUUID().toString(),
                 PriorityType.IMPORTANT.name(), UUID.randomUUID().toString(),
-                LocalDate.now(), UUID.randomUUID().toString());
+                LocalDate.now().toString(), UUID.randomUUID().toString());
         var createdImportantTask = taskClient.create(requestImportant);
         assertThat(createdImportantTask.getTask().id()).isEqualTo(requestImportant.getId());
         assertThat(createdImportantTask.getTask().description()).isEqualTo(requestImportant.getDescription());
@@ -425,7 +460,7 @@ public class TaskApiTest extends FeignBasedRestTest {
         var requestCommon1 = new TaskCreateRequest(
                 null, UUID.randomUUID().toString(),
                 PriorityType.COMMON.name(), UUID.randomUUID().toString(),
-                LocalDate.now(), UUID.randomUUID().toString());
+                LocalDate.now().toString(), UUID.randomUUID().toString());
         var createdCommonTask1 = taskClient.create(requestCommon1);
         assertThat(createdCommonTask1.getTask().id()).isEqualTo(requestCommon1.getId());
         assertThat(createdCommonTask1.getTask().description()).isEqualTo(requestCommon1.getDescription());
@@ -436,7 +471,7 @@ public class TaskApiTest extends FeignBasedRestTest {
         var requestUrgent1 = new TaskCreateRequest(
                 null, UUID.randomUUID().toString(),
                 PriorityType.URGENT.name(), UUID.randomUUID().toString(),
-                LocalDate.now(), UUID.randomUUID().toString());
+                LocalDate.now().toString(), UUID.randomUUID().toString());
         var createdUrgentTask1 = taskClient.create(requestUrgent1);
         assertThat(createdUrgentTask1.getTask().id()).isEqualTo(requestUrgent1.getId());
         assertThat(createdUrgentTask1.getTask().description()).isEqualTo(requestUrgent1.getDescription());
@@ -447,7 +482,7 @@ public class TaskApiTest extends FeignBasedRestTest {
         var requestImportant1 = new TaskCreateRequest(
                 null, UUID.randomUUID().toString(),
                 PriorityType.IMPORTANT.name(), UUID.randomUUID().toString(),
-                LocalDate.now(), UUID.randomUUID().toString());
+                LocalDate.now().toString(), UUID.randomUUID().toString());
         var createdImportantTask1 = taskClient.create(requestImportant1);
         assertThat(createdImportantTask1.getTask().id()).isEqualTo(requestImportant1.getId());
         assertThat(createdImportantTask1.getTask().description()).isEqualTo(requestImportant1.getDescription());
@@ -459,7 +494,7 @@ public class TaskApiTest extends FeignBasedRestTest {
         var requestCommon2 = new TaskCreateRequest(
                 null, UUID.randomUUID().toString(),
                 PriorityType.COMMON.name(), UUID.randomUUID().toString(),
-                LocalDate.now(), UUID.randomUUID().toString());
+                LocalDate.now().toString(), UUID.randomUUID().toString());
         var createdCommonTask2 = taskClient.create(requestCommon2);
         assertThat(createdCommonTask2.getTask().id()).isEqualTo(requestCommon2.getId());
         assertThat(createdCommonTask2.getTask().description()).isEqualTo(requestCommon2.getDescription());
@@ -470,7 +505,7 @@ public class TaskApiTest extends FeignBasedRestTest {
         var requestUrgent2 = new TaskCreateRequest(
                 null, UUID.randomUUID().toString(),
                 PriorityType.URGENT.name(), UUID.randomUUID().toString(),
-                LocalDate.now(), UUID.randomUUID().toString());
+                LocalDate.now().toString(), UUID.randomUUID().toString());
         var createdUrgentTask2 = taskClient.create(requestUrgent2);
         assertThat(createdUrgentTask2.getTask().id()).isEqualTo(requestUrgent2.getId());
         assertThat(createdUrgentTask2.getTask().description()).isEqualTo(requestUrgent2.getDescription());
@@ -481,7 +516,7 @@ public class TaskApiTest extends FeignBasedRestTest {
         var requestImportant2 = new TaskCreateRequest(
                 null, UUID.randomUUID().toString(),
                 PriorityType.IMPORTANT.name(), UUID.randomUUID().toString(),
-                LocalDate.now(), UUID.randomUUID().toString());
+                LocalDate.now().toString(), UUID.randomUUID().toString());
         var createdImportantTask2 = taskClient.create(requestImportant2);
         assertThat(createdImportantTask2.getTask().id()).isEqualTo(requestImportant2.getId());
         assertThat(createdImportantTask2.getTask().description()).isEqualTo(requestImportant2.getDescription());
@@ -509,7 +544,7 @@ public class TaskApiTest extends FeignBasedRestTest {
         return new TaskCreateRequest(
                 null, UUID.randomUUID().toString(),
                 PriorityType.COMMON.name(), UUID.randomUUID().toString(),
-                LocalDate.now(), UUID.randomUUID().toString()
+                LocalDate.now().toString(), UUID.randomUUID().toString()
         );
     }
 

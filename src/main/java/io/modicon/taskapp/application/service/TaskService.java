@@ -53,8 +53,16 @@ public interface TaskService {
         public TaskCreateResponse create(TaskCreateRequest request) {
             readUserTaskDataSource.validateExistByIdAndCreator(request.getId(), request.getUser());
 
-            if (request.getFinishDate().isBefore(LocalDate.now()))
-                throw exception(HttpStatus.BAD_REQUEST, "finish date cannot be earlier than today's date");
+            LocalDate date = null;
+            if (request.getFinishDate() != null && !request.getFinishDate().isEmpty()) {
+                try {
+                    date = LocalDate.parse(request.getFinishDate());
+                } catch (Exception e) {
+                    throw exception(HttpStatus.BAD_REQUEST, "wrong date format, please provide yyyy-mm-dd");
+                }
+                if (date.isBefore(LocalDate.now()))
+                    throw exception(HttpStatus.BAD_REQUEST, "finish date cannot be earlier than today's date");
+            }
 
             TagEntity tag = readTagDataSource.supplyTag(request.getTag());
             tag.addTask();
@@ -71,7 +79,7 @@ public interface TaskService {
                     .id(request.getId())
                     .description(request.getDescription())
                     .createdAt(LocalDate.now())
-                    .finishDate(request.getFinishDate())
+                    .finishDate(date)
                     .priorityType(taskPriorityType)
                     .tag(tag)
                     .creator(request.getUser())
@@ -90,8 +98,16 @@ public interface TaskService {
             else
                 task = readUserTaskDataSource.findByIdAndCreator(id, request.getUser());
 
-            if (request.getFinishDate().isBefore(LocalDate.now()))
-                throw exception(HttpStatus.BAD_REQUEST, "finish date cannot be earlier than today's date");
+            LocalDate date = null;
+            if (request.getFinishDate() != null && !request.getFinishDate().isEmpty()) {
+                try {
+                    date = LocalDate.parse(request.getFinishDate());
+                } catch (Exception e) {
+                    throw exception(HttpStatus.BAD_REQUEST, "wrong date format, please provide yyyy-mm-dd");
+                }
+                if (date.isBefore(LocalDate.now()))
+                    throw exception(HttpStatus.BAD_REQUEST, "finish date cannot be earlier than today's date");
+            }
 
             TagEntity tag = null;
             if (request.getTag() != null) {
@@ -121,7 +137,7 @@ public interface TaskService {
 
             task = task.toBuilder()
                     .description(request.getDescription() != null ? request.getDescription() : task.getDescription())
-                    .finishDate(request.getFinishDate() != null ? request.getFinishDate() : task.getFinishDate())
+                    .finishDate(request.getFinishDate() != null ? date : task.getFinishDate())
                     .priorityType(taskPriorityType != null ? taskPriorityType : task.getPriorityType())
                     .tag(tag != null ? tag : task.getTag())
                     .build();

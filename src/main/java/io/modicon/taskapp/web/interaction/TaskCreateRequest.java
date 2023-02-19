@@ -10,6 +10,7 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -32,8 +33,8 @@ public class TaskCreateRequest {
     private String priorityType;
     @NotEmpty(message = "description must be not empty")
     private String description;
-    @NotNull(message = "finish date type must be not empty")
-    private LocalDate finishDate;
+    @NotEmpty(message = "finish date type must be not empty")
+    private String finishDate;
     @NotNull(message = "tag must be not empty")
     private String tag;
 }

@@ -95,7 +95,7 @@ class TaskControllerTest {
         // given
         TaskCreateResponse expected = new TaskCreateResponse(taskDto);
         TaskCreateRequest request = new TaskCreateRequest(creator, taskDto.id(), taskDto.priorityType(),
-                taskDto.description(), taskDto.finishDate(), taskDto.tag());
+                taskDto.description(), taskDto.finishDate().toString(), taskDto.tag());
         when(taskService.create(any())).thenReturn(expected);
 
         // when
@@ -116,7 +116,7 @@ class TaskControllerTest {
         // given
         TaskUpdateResponse expected = new TaskUpdateResponse(taskDto);
         TaskUpdateRequest request = new TaskUpdateRequest(creator, taskDto.priorityType(),
-                taskDto.description(), taskDto.finishDate(), taskDto.tag());
+                taskDto.description(), taskDto.finishDate().toString(), taskDto.tag());
         when(taskService.update(anyString(), any())).thenReturn(expected);
 
         // when
