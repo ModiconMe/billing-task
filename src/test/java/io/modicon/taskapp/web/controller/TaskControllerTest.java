@@ -3,7 +3,7 @@ package io.modicon.taskapp.web.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import io.modicon.taskapp.application.service.TagService;
+import io.modicon.taskapp.application.service.SecurityContextHolderService;
 import io.modicon.taskapp.application.service.TaskService;
 import io.modicon.taskapp.domain.model.PriorityType;
 import io.modicon.taskapp.domain.model.TagEntity;
@@ -27,7 +27,7 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
@@ -45,6 +45,8 @@ class TaskControllerTest {
     private TaskService taskService;
     @MockBean
     private JwtAuthFilter jwtAuthFilter;
+    @MockBean
+    private SecurityContextHolderService securityContextHolderService;
 
     private ObjectMapper objectMapper;
 

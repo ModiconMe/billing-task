@@ -3,6 +3,7 @@ package io.modicon.taskapp.web.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import io.modicon.taskapp.application.service.SecurityContextHolderService;
 import io.modicon.taskapp.application.service.TagService;
 import io.modicon.taskapp.domain.model.PriorityType;
 import io.modicon.taskapp.domain.model.TagEntity;
@@ -41,6 +42,8 @@ class TagControllerTest {
     private TagService tagService;
     @MockBean
     private JwtAuthFilter jwtAuthFilter;
+    @MockBean
+    private SecurityContextHolderService securityContextHolderService;
 
     private ObjectMapper objectMapper;
 
