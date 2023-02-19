@@ -1,5 +1,6 @@
 package io.modicon.taskapp.rest.utils;
 
+import io.modicon.taskapp.infrastructure.security.ApplicationUserRole;
 import io.modicon.taskapp.rest.client.UserClient;
 import io.modicon.taskapp.web.interaction.UserLoginRequest;
 import io.modicon.taskapp.web.interaction.UserLoginResponse;
@@ -7,6 +8,7 @@ import io.modicon.taskapp.web.interaction.UserRegisterRequest;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 
@@ -18,9 +20,17 @@ public class AuthUtils {
     @Autowired(required = false)
     private UserClient userClient;
 
+    @Value("${jwt.sign-key}")
+    private String secret;
+
     public RegisteredUser register() {
         String uuid = UUID.randomUUID().toString();
         return register(uuid, uuid);
+    }
+
+    public RegisteredUser registerAdmin() {
+        String uuid = UUID.randomUUID().toString();
+        return registerAdmin(uuid, uuid);
     }
 
     public RegisteredUser register(String username, String password) {
@@ -28,12 +38,9 @@ public class AuthUtils {
         return new RegisteredUser(username, password);
     }
 
-    private String email(String uuid) {
-        return uuid + "@ex.com";
-    }
-
-    public void login(String cred) {
-        login(email(cred), cred);
+    public RegisteredUser registerAdmin(String username, String password) {
+        userClient.register(new UserRegisterRequest(username, password), secret);
+        return new RegisteredUser(username, password);
     }
 
     public void login(String username, String password) {

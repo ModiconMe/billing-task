@@ -38,7 +38,7 @@ public interface AuthUserController {
 
         @Override
         public UserRegisterResponse register(UserRegisterRequest request, String secret) {
-            return userManagementService.register(request);
+            return userManagementService.registerAdmin(request, secret);
         }
 
         @Override

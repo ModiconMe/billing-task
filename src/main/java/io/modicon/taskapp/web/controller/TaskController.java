@@ -65,7 +65,6 @@ public interface TaskController {
             return taskService.get(date, page, limit, securityContextHolderService.getCurrentUser());
         }
 
-        @Cacheable(value = "tasks")
         @Override
         public TaskGetGroupByPriorityType get(String page, String limit) {
             return taskService.get(page, limit, securityContextHolderService.getCurrentUser());

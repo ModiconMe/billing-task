@@ -12,6 +12,7 @@ import io.modicon.taskapp.web.dto.TaskDto;
 import io.modicon.taskapp.web.interaction.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -165,6 +166,7 @@ public interface TaskService {
             return new TaskGetByDateResponse(tasks.stream().map(taskDtoMapper).toList());
         }
 
+        @Cacheable(value = "tasks", key = "#user")
         @Override
         public TaskGetGroupByPriorityType get(String page, String limit, UserEntity user) {
             List<TaskEntity> tasks;
