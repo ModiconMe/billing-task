@@ -9,6 +9,7 @@ import lombok.*;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
 @Entity
+@Table(indexes = @Index(name = "tag_name_index", columnList = "tagName"))
 public class TagEntity {
 
     @Id

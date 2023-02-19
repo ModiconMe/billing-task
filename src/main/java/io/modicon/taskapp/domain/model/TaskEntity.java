@@ -14,7 +14,7 @@ import java.util.Set;
 @ToString
 @Getter
 @Entity
-@Table
+@Table(indexes = @Index(name = "finish_date_index", columnList = "finishDate"))
 public class TaskEntity {
 
     @EqualsAndHashCode.Include
