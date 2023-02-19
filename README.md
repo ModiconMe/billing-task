@@ -1,8 +1,8 @@
 > ### Smartix
 [![CI](https://github.com/ModiconMe/billing-task/workflows/CI/badge.svg)](https://github.com/ModiconMe/billing-task/actions)
 
-http://localhost:8080/swagger-ui.html - swagger ui клиент.
-http://localhost:8080/api-docs - документация.
+https://localhost:8080/swagger-ui.html - swagger ui клиент.
+https://localhost:8080/api-docs - документация.
 
 ### Функционал
 Доступен без авторизации.
