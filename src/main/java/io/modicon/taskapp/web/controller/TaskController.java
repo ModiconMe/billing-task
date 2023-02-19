@@ -85,7 +85,7 @@ public interface TaskController {
                               @RequestParam(value = "page", defaultValue = "0") String page,
                               @RequestParam(value = "limit", defaultValue = "20") String limit);
 
-    @Operation(summary = "get all tasks group by priority type")
+    @Operation(summary = "get all tasks group by priority type, Cacheable")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successfully return data",
                     content = { @Content(mediaType = "application/json",
