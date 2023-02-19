@@ -43,7 +43,7 @@ class FileManagementServiceTest {
     @Mock
     private ApplicationConfig applicationConfig;
 
-    private String fileDir = "/taskapp/uploads";
+    private String fileDir = "/taskapp/uploads1";
 
     @BeforeEach
     void setUp() {

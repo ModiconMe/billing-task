@@ -19,7 +19,7 @@ services:
     container_name: postgres
     environment:
       POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: root
+      POSTGRES_PASSWORD: dXBqZDG12oUM3WR04UaNnoGaZ80lzz4H
       PGDATA: /data/postgres
     ports:
       - "5432:5432"
