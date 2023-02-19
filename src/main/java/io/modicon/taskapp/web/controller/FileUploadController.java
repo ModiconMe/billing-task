@@ -1,5 +1,6 @@
 package io.modicon.taskapp.web.controller;
 
+import io.modicon.taskapp.application.service.SecurityContextHolderService;
 import io.modicon.taskapp.application.service.TaskFileService;
 import io.modicon.taskapp.web.dto.ApiExceptionDto;
 import io.modicon.taskapp.web.interaction.*;
@@ -73,20 +74,21 @@ public interface FileUploadController {
     class BaseFileUploadController implements FileUploadController {
 
         private final TaskFileService taskFileService;
+        private final SecurityContextHolderService securityContextHolderService;
 
         @Override
         public TaskFileListResponse listFiles(String taskName) {
-            return taskFileService.listFiles(taskName);
+            return taskFileService.listFiles(taskName, securityContextHolderService.getCurrentUser());
         }
 
         @Override
         public TaskFileUploadResponse upload(MultipartFile file, String taskName) {
-            return taskFileService.upload(new TaskFileUploadRequest(taskName, file));
+            return taskFileService.upload(new TaskFileUploadRequest(taskName, file), securityContextHolderService.getCurrentUser());
         }
 
         @Override
         public ResponseEntity<?> download(String taskName, String fileName) {
-            TaskFileDownloadResponse response = taskFileService.download(new TaskFileDownloadRequest(taskName, fileName));
+            TaskFileDownloadResponse response = taskFileService.download(new TaskFileDownloadRequest(taskName, fileName), securityContextHolderService.getCurrentUser());
             return ResponseEntity.ok()
                     .contentType(MediaType.valueOf(response.getContentType()))
                     .body(response.getFile());

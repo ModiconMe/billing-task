@@ -4,12 +4,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import io.modicon.taskapp.application.service.FileManagementService;
+import io.modicon.taskapp.application.service.SecurityContextHolderService;
 import io.modicon.taskapp.application.service.TaskFileService;
 import io.modicon.taskapp.application.service.TaskService;
-import io.modicon.taskapp.domain.model.FileData;
-import io.modicon.taskapp.domain.model.PriorityType;
-import io.modicon.taskapp.domain.model.TagEntity;
-import io.modicon.taskapp.domain.model.TaskEntity;
+import io.modicon.taskapp.domain.model.*;
+import io.modicon.taskapp.infrastructure.security.ApplicationUserRole;
 import io.modicon.taskapp.infrastructure.security.jwt.JwtAuthFilter;
 import io.modicon.taskapp.web.interaction.*;
 import org.junit.jupiter.api.BeforeEach;
@@ -46,6 +45,8 @@ class FileUploadControllerTest {
     private TaskFileService taskFileService;
     @MockBean
     private JwtAuthFilter jwtAuthFilter;
+    @MockBean
+    private SecurityContextHolderService securityContextHolderService;
 
     private ObjectMapper objectMapper;
 
@@ -61,6 +62,7 @@ class FileUploadControllerTest {
     private FileData fileData;
     private TaskEntity commonTask;
     private MockMultipartFile file;
+    private UserEntity user;
 
     {
         fileData = new FileData("id", "name", "text/plain", "path");
@@ -73,13 +75,19 @@ class FileUploadControllerTest {
                 .finishDate(LocalDate.now())
                 .build();
         file = new MockMultipartFile("file", fileData.getName(), "text/plain", new byte[1]);
+        user = UserEntity.builder()
+                .username("username")
+                .password("password")
+                .role(ApplicationUserRole.USER)
+                .build();
     }
 
     @Test
     void shouldListFiles() throws Exception {
         // given
         TaskFileListResponse expected = new TaskFileListResponse(Map.of(fileData.getId(), fileData.getName()));
-        when(taskFileService.listFiles(commonTask.getId())).thenReturn(expected);
+        when(taskFileService.listFiles(commonTask.getId(), user)).thenReturn(expected);
+        when(securityContextHolderService.getCurrentUser()).thenReturn(user);
 
         // when
         var json = mockMvc.perform(get(BASE_URL + "/" + commonTask.getId())
@@ -97,7 +105,7 @@ class FileUploadControllerTest {
     void shouldUploadFile() throws Exception {
         // given
         TaskFileUploadResponse expected = new TaskFileUploadResponse(fileData.getName());
-        when(taskFileService.upload(new TaskFileUploadRequest(commonTask.getId(), any()))).thenReturn(expected);
+        when(taskFileService.upload(new TaskFileUploadRequest(commonTask.getId(), any()), any())).thenReturn(expected);
 
         // when
         var json = mockMvc.perform(multipart(BASE_URL + "/" + commonTask.getId())
@@ -115,7 +123,7 @@ class FileUploadControllerTest {
     void shouldDownloadFile() throws Exception {
         // given
         TaskFileDownloadResponse expected = new TaskFileDownloadResponse(file.getBytes(), fileData.getType());
-        when(taskFileService.download(new TaskFileDownloadRequest(commonTask.getId(), any()))).thenReturn(expected);
+        when(taskFileService.download(new TaskFileDownloadRequest(commonTask.getId(), any()), any())).thenReturn(expected);
 
         // when
         var bytes = mockMvc.perform(get(BASE_URL + "/" + commonTask.getId() + "/" + file.getName())
