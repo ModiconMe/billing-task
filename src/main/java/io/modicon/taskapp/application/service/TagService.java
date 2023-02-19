@@ -20,7 +20,7 @@ import java.util.UUID;
 import static io.modicon.taskapp.infrastructure.exception.ApiException.exception;
 
 public interface TagService {
-    TagGetByIdWithTaskResponse getTagWithTasks(String tagName, String page, String limit);
+    TagGetByIdWithTaskResponse getTagWithTasks(String tagName, String page, String limit, UserEntity user);
 
     TagGetAllWithTaskExistedResponse getAllTagsWithExistedTasks();
 
@@ -37,7 +37,8 @@ public interface TagService {
 
         private final TagDataSource.Read readTagDataSource;
         private final TagDataSource.Write writeTagDataSource;
-        private final TaskDataSource.ReadUser readTaskDataSource;
+        private final TaskDataSource.ReadUser readUserTaskDataSource;
+        private final TaskDataSource.ReadAdmin readAdminTaskDataSource;
         private final TaskDataSource.Write writeTaskDataSource;
         private final TaskFileService taskFileService;
 
@@ -46,10 +47,14 @@ public interface TagService {
 
         @Transactional(readOnly = true)
         @Override
-        public TagGetByIdWithTaskResponse getTagWithTasks(String tagName, String page, String limit) {
+        public TagGetByIdWithTaskResponse getTagWithTasks(String tagName, String page, String limit, UserEntity user) {
             TagEntity tag = readTagDataSource.findByName(tagName);
 
-            List<TaskEntity> tasks = readTaskDataSource.findByTag(tag, page, limit);
+            List<TaskEntity> tasks;
+            if (user.getRole().equals(ApplicationUserRole.ADMIN))
+                tasks = readAdminTaskDataSource.findByTag(tag, page, limit);
+            else
+                tasks = readUserTaskDataSource.findByTag(tag, page, limit, user);
 
             return new TagGetByIdWithTaskResponse(tagDtoMapper.apply(tag), tasks.stream().map(taskDtoMapper).toList());
         }
@@ -96,7 +101,7 @@ public interface TagService {
 
             TagEntity tag = readTagDataSource.findByName(tagName);
 
-            List<TaskEntity> tasks = readTaskDataSource.findByTag(tag);
+            List<TaskEntity> tasks = readAdminTaskDataSource.findByTag(tag);
             tasks.forEach(t -> taskFileService.deleteTaskFiles(t.getId()));
             writeTaskDataSource.deleteAll(tasks);
             writeTagDataSource.delete(tag);

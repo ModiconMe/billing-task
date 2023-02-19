@@ -74,10 +74,10 @@ class TaskRepositoryTest {
         taskRepository.save(importantTask);
         userRepository.save(creator);
 
-        Optional<TaskEntity> expected = taskRepository.findByIdAndCreator(importantTask.getId(), creator);
+        Optional<TaskEntity> actual = taskRepository.findByIdAndCreator(importantTask.getId(), creator);
 
-        assertTrue(expected.isPresent());
-        assertEquals(expected.get(), importantTask);
+        assertTrue(actual.isPresent());
+        assertEquals(actual.get(), importantTask);
     }
 
     @Test
@@ -85,9 +85,9 @@ class TaskRepositoryTest {
         taskRepository.save(importantTask);
         userRepository.save(creator);
 
-        Optional<TaskEntity> expected = taskRepository.findByIdAndCreator(commonTask.getId(), creator);
+        Optional<TaskEntity> actual = taskRepository.findByIdAndCreator(commonTask.getId(), creator);
 
-        assertTrue(expected.isEmpty());
+        assertTrue(actual.isEmpty());
     }
 
     @Test
@@ -102,13 +102,50 @@ class TaskRepositoryTest {
         assertTrue(fieldToSort.isPresent());
 
         // when
-        List<TaskEntity> expected = taskRepository.findByTag(tag,
+        List<TaskEntity> actual = taskRepository.findByTag(tag,
                 PageRequest.of(0, 10, Sort.by(fieldToSort.get().getName())));
 
         // then
-        assertEquals(expected.get(0), urgentTask);
-        assertEquals(expected.get(1), importantTask);
-        assertEquals(expected.get(2), commonTask);
+        assertEquals(actual.get(0), urgentTask);
+        assertEquals(actual.get(1), importantTask);
+        assertEquals(actual.get(2), commonTask);
+    }
+
+    @Test
+    void shouldFindByTagAndCreator_andSortByPriorityType() {
+        // given
+        taskRepository.saveAll(List.of(importantTask, commonTask, urgentTask));
+
+        Optional<Field> fieldToSort = Arrays
+                .stream(TaskEntity.class.getDeclaredFields())
+                .filter(f -> f.getType().equals(PriorityType.class))
+                .findFirst();
+        assertTrue(fieldToSort.isPresent());
+
+        // when
+        List<TaskEntity> actual = taskRepository.findByTagAndCreator(tag, creator,
+                PageRequest.of(0, 10, Sort.by(fieldToSort.get().getName())));
+
+        // then
+        assertEquals(actual.get(0), urgentTask);
+        assertEquals(actual.get(1), importantTask);
+    }
+
+    @Test
+    void shouldNotFindByTagAndCreator_sorted() {
+        // given
+        Optional<Field> fieldToSort = Arrays
+                .stream(TaskEntity.class.getDeclaredFields())
+                .filter(f -> f.getType().equals(PriorityType.class))
+                .findFirst();
+        assertTrue(fieldToSort.isPresent());
+
+        // when
+        List<TaskEntity> actual = taskRepository.findByTagAndCreator(tag, creator,
+                PageRequest.of(0, 10, Sort.by(fieldToSort.get().getName())));
+
+        // then
+        assertTrue(actual.isEmpty());
     }
 
     @Test
@@ -121,11 +158,11 @@ class TaskRepositoryTest {
         assertTrue(fieldToSort.isPresent());
 
         // when
-        List<TaskEntity> expected = taskRepository.findByTag(tag,
+        List<TaskEntity> actual = taskRepository.findByTag(tag,
                 PageRequest.of(0, 10, Sort.by(fieldToSort.get().getName())));
 
         // then
-        assertTrue(expected.isEmpty());
+        assertTrue(actual.isEmpty());
     }
 
     @Test
@@ -134,21 +171,34 @@ class TaskRepositoryTest {
         taskRepository.saveAll(List.of(importantTask, commonTask, urgentTask));
 
         // when
-        List<TaskEntity> expected = taskRepository.findByTag(tag);
+        List<TaskEntity> actual = taskRepository.findByTag(tag);
 
         // then
-        assertEquals(expected.get(0), importantTask);
-        assertEquals(expected.get(1), commonTask);
-        assertEquals(expected.get(2), urgentTask);
+        assertEquals(actual.get(0), importantTask);
+        assertEquals(actual.get(1), commonTask);
+        assertEquals(actual.get(2), urgentTask);
+    }
+
+    @Test
+    void shouldFindByTagAndCreator() {
+        // given
+        taskRepository.saveAll(List.of(importantTask, commonTask, urgentTask));
+
+        // when
+        List<TaskEntity> actual = taskRepository.findByTagAndCreator(tag, creator);
+
+        // then
+        assertEquals(importantTask, actual.get(0));
+        assertEquals(urgentTask, actual.get(1));
     }
 
     @Test
     void shouldNotFindByTag() {
         // given
         // when
-        List<TaskEntity> expected = taskRepository.findByTag(tag);
+        List<TaskEntity> actual = taskRepository.findByTag(tag);
 
         // then
-        assertTrue(expected.isEmpty());
+        assertTrue(actual.isEmpty());
     }
 }

@@ -43,6 +43,8 @@ class TagServiceTest {
     @Mock
     private TaskDataSource.ReadUser readUserTaskDataSource;
     @Mock
+    private TaskDataSource.ReadAdmin readAdminTaskDataSource;
+    @Mock
     private TaskDataSource.Write writeTaskDataSource;
     @Mock
     private TaskFileService taskFileService;
@@ -53,7 +55,7 @@ class TagServiceTest {
 
     @BeforeEach
     void setUp() {
-        underTest = new TagService.Base(readTagDataSource, writeTagDataSource, readUserTaskDataSource,
+        underTest = new TagService.Base(readTagDataSource, writeTagDataSource, readUserTaskDataSource, readAdminTaskDataSource,
                 writeTaskDataSource, taskFileService, taskDtoMapper, tagDtoMapper);
     }
 
@@ -104,12 +106,12 @@ class TagServiceTest {
     void shouldGetTagWithTasks() {
         // given
         when(readTagDataSource.findByName(tag.getTagName())).thenReturn(tag);
-        when(readUserTaskDataSource.findByTag(tag, "0", "1")).thenReturn(List.of(commonTask));
+        when(readAdminTaskDataSource.findByTag(tag, "0", "1")).thenReturn(List.of(commonTask));
         when(tagDtoMapper.apply(tag)).thenReturn(tagDto);
         when(taskDtoMapper.apply(commonTask)).thenReturn(taskDto);
 
         // when
-        TagGetByIdWithTaskResponse actual = underTest.getTagWithTasks(tag.getTagName(), "0", "1");
+        TagGetByIdWithTaskResponse actual = underTest.getTagWithTasks(tag.getTagName(), "0", "1", admin);
 
         // then
         TagGetByIdWithTaskResponse expected = new TagGetByIdWithTaskResponse(tagDto, List.of(taskDto));
@@ -178,7 +180,7 @@ class TagServiceTest {
         // given
         when(tagDtoMapper.apply(tag)).thenReturn(tagDto);
         when(readTagDataSource.findByName(tag.getTagName())).thenReturn(tag);
-        when(readUserTaskDataSource.findByTag(tag)).thenReturn(List.of(commonTask));
+        when(readAdminTaskDataSource.findByTag(tag)).thenReturn(List.of(commonTask));
 
         // when
         TagDeleteResponse actual = underTest.delete(tag.getTagName(), admin);

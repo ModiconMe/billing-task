@@ -21,6 +21,10 @@ public interface TaskDataSource {
         List<TaskEntity> findCurrentTask(LocalDate finishDate, String page, String limit);
 
         List<TaskEntity> findAllTasks(String page, String limit);
+
+        List<TaskEntity> findByTag(TagEntity tag);
+
+        List<TaskEntity> findByTag(TagEntity tag, String page, String limit);
     }
 
     interface ReadUser {
@@ -28,9 +32,9 @@ public interface TaskDataSource {
 
         TaskEntity findByIdAndCreator(String id, UserEntity creator);
 
-        List<TaskEntity> findByTag(TagEntity tag);
+        List<TaskEntity> findByTag(TagEntity tag, UserEntity creator);
 
-        List<TaskEntity> findByTag(TagEntity tag, String page, String limit);
+        List<TaskEntity> findByTag(TagEntity tag, String page, String limit, UserEntity creator);
 
         List<TaskEntity> findCurrentTask(LocalDate finishDate, String page, String limit, UserEntity creator);
 
@@ -66,13 +70,13 @@ public interface TaskDataSource {
         }
 
         @Override
-        public List<TaskEntity> findByTag(TagEntity tag) {
-            return jpaTaskRepository.findByTag(tag);
+        public List<TaskEntity> findByTag(TagEntity tag, UserEntity creator) {
+            return jpaTaskRepository.findByTagAndCreator(tag, creator);
         }
 
         @Override
-        public List<TaskEntity> findByTag(TagEntity tag, String page, String limit) {
-            return jpaTaskRepository.findByTag(tag, taskSortingDispatcher.getPage(page, limit));
+        public List<TaskEntity> findByTag(TagEntity tag, String page, String limit, UserEntity creator) {
+            return jpaTaskRepository.findByTagAndCreator(tag, creator, taskSortingDispatcher.getPage(page, limit));
         }
 
         @Override
@@ -110,6 +114,16 @@ public interface TaskDataSource {
         @Override
         public List<TaskEntity> findAllTasks(String page, String limit) {
             return jpaTaskRepository.findAll(taskSortingDispatcher.getPage(page, limit)).getContent();
+        }
+
+        @Override
+        public List<TaskEntity> findByTag(TagEntity tag) {
+            return jpaTaskRepository.findByTag(tag);
+        }
+
+        @Override
+        public List<TaskEntity> findByTag(TagEntity tag, String page, String limit) {
+            return jpaTaskRepository.findByTag(tag, taskSortingDispatcher.getPage(page, limit));
         }
     }
 

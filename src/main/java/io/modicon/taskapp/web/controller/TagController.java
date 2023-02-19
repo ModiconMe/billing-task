@@ -42,7 +42,7 @@ public interface TagController {
 
         @Override
         public TagGetByIdWithTaskResponse getTagWithTasks(String tagName, String page, String limit) {
-            return tagService.getTagWithTasks(tagName, page, limit);
+            return tagService.getTagWithTasks(tagName, page, limit, securityContextHolderService.getCurrentUser());
         }
 
         @Override

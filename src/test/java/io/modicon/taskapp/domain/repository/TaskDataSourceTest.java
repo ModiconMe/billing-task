@@ -132,19 +132,31 @@ class TaskDataSourceTest {
     }
 
     @Test
-    void shouldFindByTag() {
+    void shouldFindByTag_admin() {
         // given
         when(jpaTaskRepository.findByTag(tag)).thenReturn(List.of(commonTask));
 
         // when
-        List<TaskEntity> actual = readUserUnderTest.findByTag(tag);
+        List<TaskEntity> actual = readAdminUnderTest.findByTag(tag);
 
         // then
         assertEquals(List.of(commonTask), actual);
     }
 
     @Test
-    void shouldFindByTag_sorted() {
+    void shouldFindByTag_user() {
+        // given
+        when(jpaTaskRepository.findByTagAndCreator(tag, creator)).thenReturn(List.of(commonTask));
+
+        // when
+        List<TaskEntity> actual = readUserUnderTest.findByTag(tag, creator);
+
+        // then
+        assertEquals(List.of(commonTask), actual);
+    }
+
+    @Test
+    void shouldFindByTag_sorted_admin() {
         // given
         Optional<Field> fieldToSort = Arrays
                 .stream(TaskEntity.class.getDeclaredFields())
@@ -156,7 +168,26 @@ class TaskDataSourceTest {
         when(jpaTaskRepository.findByTag(tag, pageable)).thenReturn(List.of(commonTask));
 
         // when
-        List<TaskEntity> actual = readUserUnderTest.findByTag(tag, "0", "1");
+        List<TaskEntity> actual = readAdminUnderTest.findByTag(tag, "0", "1");
+
+        // then
+        assertEquals(List.of(commonTask), actual);
+    }
+
+    @Test
+    void shouldFindByTag_sorted_user() {
+        // given
+        Optional<Field> fieldToSort = Arrays
+                .stream(TaskEntity.class.getDeclaredFields())
+                .filter(f -> f.getType().equals(PriorityType.class))
+                .findFirst();
+
+        PageRequest pageable = PageRequest.of(0, 1, Sort.by(fieldToSort.get().getName()));
+        when(taskSortingDispatcher.getPage("0", "1")).thenReturn(pageable);
+        when(jpaTaskRepository.findByTagAndCreator(tag, creator, pageable)).thenReturn(List.of(commonTask));
+
+        // when
+        List<TaskEntity> actual = readUserUnderTest.findByTag(tag, "0", "1", creator);
 
         // then
         assertEquals(List.of(commonTask), actual);
@@ -171,7 +202,7 @@ class TaskDataSourceTest {
         when(jpaTaskRepository.findByTag(tag, pageable)).thenReturn(List.of(commonTask));
 
         // when
-        List<TaskEntity> actual = readUserUnderTest.findByTag(tag, "0", "1");
+        List<TaskEntity> actual = readAdminUnderTest.findByTag(tag, "0", "1");
 
         // then
         assertEquals(List.of(commonTask), actual);

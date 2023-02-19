@@ -9,6 +9,7 @@ import io.modicon.taskapp.domain.model.PriorityType;
 import io.modicon.taskapp.domain.model.TagEntity;
 import io.modicon.taskapp.domain.model.TaskEntity;
 import io.modicon.taskapp.domain.model.UserEntity;
+import io.modicon.taskapp.infrastructure.security.ApplicationUserRole;
 import io.modicon.taskapp.infrastructure.security.jwt.JwtAuthFilter;
 import io.modicon.taskapp.web.dto.TagDto;
 import io.modicon.taskapp.web.dto.TaskDto;
@@ -57,6 +58,7 @@ class TagControllerTest {
     String BASE_URL = "/api/v1/tags";
 
     private final UserEntity creator;
+    private final UserEntity admin;
     private final TaskEntity commonTask;
     private final TagEntity tag;
     private final TagDto tagDto;
@@ -66,6 +68,11 @@ class TagControllerTest {
         creator = UserEntity.builder()
                 .username("username")
                 .password("password")
+                .build();
+        admin = UserEntity.builder()
+                .username("username")
+                .password("password")
+                .role(ApplicationUserRole.ADMIN)
                 .build();
         tag = new TagEntity("id1","tag", 1L);
         tagDto = new TagDto(tag.getTagName(), tag.getTaskCount());
@@ -93,7 +100,7 @@ class TagControllerTest {
         TagGetByIdWithTaskResponse expected = new TagGetByIdWithTaskResponse(tagDto, List.of(taskDto));
         String limit = "10";
         String page = "1";
-        when(tagService.getTagWithTasks(tag.getTagName(), page, limit)).thenReturn(expected);
+        when(tagService.getTagWithTasks(tag.getTagName(), page, limit, null)).thenReturn(expected);
 
         // when
         var json = mockMvc.perform(get(BASE_URL + "/" + tag.getTagName())

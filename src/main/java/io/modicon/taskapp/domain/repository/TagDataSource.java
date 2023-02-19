@@ -4,6 +4,7 @@ import io.modicon.taskapp.domain.model.TagEntity;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
@@ -33,6 +34,7 @@ public interface TagDataSource {
         void delete(TagEntity tag);
     }
 
+    @Transactional(readOnly = true)
     @RequiredArgsConstructor
     @Service
     class JpaReadTagDataSource implements TagDataSource.Read {
@@ -67,6 +69,7 @@ public interface TagDataSource {
         }
     }
 
+    @Transactional
     @RequiredArgsConstructor
     @Service
     class JpaWriteTagDataSource implements TagDataSource.Write {

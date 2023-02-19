@@ -13,6 +13,10 @@ import java.util.Optional;
 public interface JpaTaskRepository extends JpaRepository<TaskEntity, String> {
     Optional<TaskEntity> findByIdAndCreator(String id, UserEntity creator);
 
+    List<TaskEntity> findByTagAndCreator(TagEntity tag, UserEntity creator);
+
+    List<TaskEntity> findByTagAndCreator(TagEntity tag, UserEntity creator, Pageable pageable);
+
     List<TaskEntity> findByTag(TagEntity tag);
 
     List<TaskEntity> findByTag(TagEntity tag, Pageable pageable);
