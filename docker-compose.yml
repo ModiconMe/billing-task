@@ -11,6 +11,8 @@ services:
     depends_on:
       - postgres
     restart: unless-stopped
+    volumes:
+      - ~/taskapp:/root/taskapp
 
   postgres:
     image: postgres
@@ -24,6 +26,8 @@ services:
     networks:
       - billing-app-network
     restart: unless-stopped
+    volumes:
+      - ./pgdata:/data/postgres
 
 networks:
   billing-app-network:
