@@ -1,4 +1,4 @@
-> ### Smartix
+> ### Billing
 [![CI](https://github.com/ModiconMe/billing-task/workflows/CI/badge.svg)](https://github.com/ModiconMe/billing-task/actions)
 
 https://localhost:8080/swagger-ui.html - swagger ui клиент.
