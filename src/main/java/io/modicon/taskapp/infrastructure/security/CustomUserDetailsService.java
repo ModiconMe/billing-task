@@ -1,6 +1,5 @@
 package io.modicon.taskapp.infrastructure.security;
 
-import io.modicon.taskapp.domain.repository.JpaUserRepository;
 import io.modicon.taskapp.domain.repository.UserDataSource;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;

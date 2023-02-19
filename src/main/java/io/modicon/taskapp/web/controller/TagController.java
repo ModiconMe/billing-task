@@ -1,5 +1,6 @@
 package io.modicon.taskapp.web.controller;
 
+import io.modicon.taskapp.application.service.SecurityContextHolderService;
 import io.modicon.taskapp.application.service.TagService;
 import io.modicon.taskapp.domain.model.UserEntity;
 import io.modicon.taskapp.web.interaction.*;
@@ -25,12 +26,10 @@ public interface TagController {
     TagCreateResponse create(@Valid @RequestBody TagCreateRequest request);
 
     @PutMapping("/{tagName}")
-    TagUpdateResponse update(@PathVariable String tagName, @Valid @RequestBody TagUpdateRequest request,
-                             @AuthenticationPrincipal UserEntity user);
+    TagUpdateResponse update(@PathVariable String tagName, @Valid @RequestBody TagUpdateRequest request);
 
     @DeleteMapping("/{tagName}")
-    TagDeleteResponse delete(@PathVariable String tagName,
-                             @AuthenticationPrincipal UserEntity user);
+    TagDeleteResponse delete(@PathVariable String tagName);
 
     @SecurityRequirement(name = "Bearer Authentication")
     @RequiredArgsConstructor
@@ -39,6 +38,7 @@ public interface TagController {
     class BaseTagController implements TagController {
 
         private final TagService tagService;
+        private final SecurityContextHolderService securityContextHolderService;
 
         @Override
         public TagGetByIdWithTaskResponse getTagWithTasks(String tagName, String page, String limit) {
@@ -56,13 +56,13 @@ public interface TagController {
         }
 
         @Override
-        public TagUpdateResponse update(String tagName, TagUpdateRequest request, UserEntity user) {
-            return tagService.update(request.withUpdatedTag(tagName).withUser(user));
+        public TagUpdateResponse update(String tagName, TagUpdateRequest request) {
+            return tagService.update(request.withUpdatedTag(tagName).withUser(securityContextHolderService.getCurrentUser()));
         }
 
         @Override
-        public TagDeleteResponse delete(String tagName, UserEntity user) {
-            return tagService.delete(tagName, user);
+        public TagDeleteResponse delete(String tagName) {
+            return tagService.delete(tagName, securityContextHolderService.getCurrentUser());
         }
     }
 

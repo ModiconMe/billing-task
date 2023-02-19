@@ -1,105 +1,102 @@
 package io.modicon.taskapp.rest;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import feign.FeignException;
+import io.modicon.taskapp.rest.client.UserClient;
+import io.modicon.taskapp.rest.config.FeignBasedRestTest;
 import io.modicon.taskapp.web.interaction.UserLoginRequest;
 import io.modicon.taskapp.web.interaction.UserLoginResponse;
 import io.modicon.taskapp.web.interaction.UserRegisterRequest;
+import io.modicon.taskapp.web.interaction.UserRegisterResponse;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.http.MediaType;
-import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.ResultMatcher;
-import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
+import org.springframework.http.HttpStatus;
 
 import java.util.UUID;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.assertj.core.api.AssertionsForClassTypes.catchThrowableOfType;
 
-@SpringBootTest
-@AutoConfigureMockMvc
-public class UserApiTest {
+public class UserApiTest extends FeignBasedRestTest {
 
     @Autowired
-    private MockMvc mockMvc;
+    private UserClient userClient;
 
-    private final ObjectMapper objectMapper = new ObjectMapper();
-
-    private final static String BASE_URL = "/api/v1/users";
+    private final static String WRONG = "wrong";
 
     @Test
-    void should_returnCorrectData_whenRegisterUser() throws Exception {
+    void REGISTER_USER_should_returnCorrectData() {
         UserRegisterRequest request = registerCommand();
-        sendRequest(post(BASE_URL + "/register"), request);
+
+        UserRegisterResponse response = userClient.register(request);
+
+        assertThat(response.getUser().username()).isEqualTo(request.getUsername());
     }
 
     @Test
-    void should_returnCorrectData_whenLoginUser() throws Exception {
-        UserRegisterRequest registerRequest = registerCommand();
-        sendRequest(post(BASE_URL + "/register"), registerRequest);
+    void REGISTER_USER_should_return400_whenProvideEmptyUsername() {
+        UserRegisterRequest request = new UserRegisterRequest(UUID.randomUUID().toString(), "");
 
-        UserLoginRequest loginRequest = new UserLoginRequest(registerRequest.getUsername(), registerRequest.getPassword());
-        UserLoginResponse response = sendRequestAndReturn(post(BASE_URL + "/login"), loginRequest, UserLoginResponse.class);
+        FeignException exception = catchThrowableOfType(() -> userClient.register(request), FeignException.class);
 
-        assertEquals(response.getUser().username(), loginRequest.getUsername());
-        assertFalse(response.getToken().isEmpty());
+        assertThat(exception.status()).isEqualTo(HttpStatus.BAD_REQUEST.value());
+        assertThat(exception.contentUTF8()).isNotEmpty();
     }
 
     @Test
-    void should_return401_whenLoginUser() throws Exception {
-        UserRegisterRequest registerRequest = registerCommand();
-        sendRequest(post(BASE_URL + "/register"), registerRequest);
+    void REGISTER_USER_should_return400_whenProvideEmptyPassword() {
+        UserRegisterRequest request = new UserRegisterRequest("", UUID.randomUUID().toString());
 
-        UserLoginRequest loginRequest = new UserLoginRequest(
-                registerRequest.getUsername(),
-                registerRequest.getPassword() + "wrong");
+        FeignException exception = catchThrowableOfType(() -> userClient.register(request), FeignException.class);
 
-        sendRequestAndExpect(post(BASE_URL + "/login"), loginRequest, status().isUnauthorized());
+        assertThat(exception.status()).isEqualTo(HttpStatus.BAD_REQUEST.value());
+        assertThat(exception.contentUTF8()).isNotEmpty();
     }
 
     @Test
-    void should_return404_whenLoginUser() throws Exception {
-        UserRegisterRequest registerRequest = registerCommand();
-        sendRequest(post(BASE_URL + "/register"), registerRequest);
+    void REGISTER_USER_should_return400_whenProvideNull() {
+        UserRegisterRequest request = new UserRegisterRequest(null, null);
 
-        UserLoginRequest loginRequest = new UserLoginRequest(
-                registerRequest.getUsername() + "wrong",
-                registerRequest.getPassword());
+        FeignException exception = catchThrowableOfType(() -> userClient.register(request), FeignException.class);
 
-        sendRequestAndExpect(post(BASE_URL + "/login"), loginRequest, status().isNotFound());
+        assertThat(exception.status()).isEqualTo(HttpStatus.BAD_REQUEST.value());
+        assertThat(exception.contentUTF8()).isNotEmpty();
+    }
+
+    @Test
+    void LOGIN_USER_should_returnCorrectData() {
+        UserRegisterRequest request = registerCommand();
+        userClient.register(request);
+
+        UserLoginResponse response = userClient.login(new UserLoginRequest(request.getUsername(), request.getPassword()));
+
+        assertThat(response.getUser().username()).isEqualTo(request.getUsername());
+        assertThat(response.getToken()).isNotEmpty();
+    }
+
+    @Test
+    void LOGIN_USER_should_return404_whenWrongUsernameProvided() {
+        UserRegisterRequest request = registerCommand();
+        userClient.register(request);
+
+        FeignException exception = catchThrowableOfType(() -> userClient.login(new UserLoginRequest(WRONG, request.getPassword())), FeignException.class);
+
+        assertThat(exception.status()).isEqualTo(HttpStatus.NOT_FOUND.value());
+        assertThat(exception.contentUTF8()).isNotEmpty();
+    }
+
+    @Test
+    void LOGIN_USER_should_return403_whenWrongPasswordProvided() {
+        UserRegisterRequest request = registerCommand();
+        userClient.register(request);
+
+        FeignException exception = catchThrowableOfType(() -> userClient.login(new UserLoginRequest(request.getUsername(), WRONG)), FeignException.class);
+
+        assertThat(exception.status()).isEqualTo(HttpStatus.FORBIDDEN.value());
+        assertThat(exception.contentUTF8()).isNotEmpty();
     }
 
     private static UserRegisterRequest registerCommand() {
         return new UserRegisterRequest(UUID.randomUUID().toString(),
                 UUID.randomUUID().toString());
-    }
-
-    private void sendRequest(MockHttpServletRequestBuilder requestBuilder, Object content) throws Exception {
-        mockMvc.perform(requestBuilder
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(content)))
-                .andExpect(status().isOk());
-    }
-
-    private void sendRequestAndExpect(MockHttpServletRequestBuilder requestBuilder, Object content, ResultMatcher status) throws Exception {
-        mockMvc.perform(requestBuilder
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(content)))
-                .andExpect(status);
-    }
-
-    private <E> E sendRequestAndReturn(MockHttpServletRequestBuilder requestBuilder, Object content, Class<E> clazz) throws Exception {
-        String contentAsString = mockMvc.perform(requestBuilder
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(content)))
-                .andExpect(status().isOk())
-                .andReturn().getResponse().getContentAsString();
-        return objectMapper.readValue(contentAsString, clazz);
     }
 }

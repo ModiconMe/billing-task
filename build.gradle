@@ -60,7 +60,7 @@ testing {
     }
 }
 dependencies {
-    intTestImplementation 'org.springframework.boot:spring-boot-starter-web'
+    intTestImplementation 'org.springframework.security:spring-security-test'
     intTestCompileOnly 'org.projectlombok:lombok'
     intTestAnnotationProcessor 'org.projectlombok:lombok'
     intTestRuntimeOnly "com.h2database:h2:${h2Version}"
@@ -68,7 +68,6 @@ dependencies {
     intTestImplementation "org.springframework.cloud:spring-cloud-starter-openfeign:${openFeignVersion}"
     intTestImplementation "io.github.openfeign:feign-jackson:${jacksonFeignVersion}"
     intTestImplementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.14.2'
-
 }
 
 tasks.named('check') {

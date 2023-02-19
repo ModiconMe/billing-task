@@ -16,13 +16,13 @@ public interface AuthUserController {
     String BASE_URL_V1 = "/api/v1/users";
 
     @PostMapping("/register")
-    ResponseEntity<UserRegisterResponse> register(@Valid @RequestBody UserRegisterRequest request);
+    UserRegisterResponse register(@Valid @RequestBody UserRegisterRequest request);
 
     @PostMapping("/register/{secret}")
-    ResponseEntity<UserRegisterResponse> register(@Valid @RequestBody UserRegisterRequest request, @PathVariable String secret);
+    UserRegisterResponse register(@Valid @RequestBody UserRegisterRequest request, @PathVariable String secret);
 
     @PostMapping("/login")
-    ResponseEntity<UserLoginResponse> login(@Valid @RequestBody UserLoginRequest request);
+    UserLoginResponse login(@Valid @RequestBody UserLoginRequest request);
 
     @RequiredArgsConstructor
     @RestController
@@ -32,23 +32,18 @@ public interface AuthUserController {
         private final UserManagementService userManagementService;
 
         @Override
-        public ResponseEntity<UserRegisterResponse> register(UserRegisterRequest request) {
-            userManagementService.register(request);
-            return ResponseEntity.ok().build();
+        public UserRegisterResponse register(UserRegisterRequest request) {
+            return userManagementService.register(request);
         }
 
         @Override
-        public ResponseEntity<UserRegisterResponse> register(UserRegisterRequest request, String secret) {
-            userManagementService.registerAdmin(request, secret);
-            return ResponseEntity.ok().build();
+        public UserRegisterResponse register(UserRegisterRequest request, String secret) {
+            return userManagementService.register(request);
         }
 
         @Override
-        public ResponseEntity<UserLoginResponse> login(UserLoginRequest request) {
-            UserLoginResponse response = userManagementService.login(request);
-            return ResponseEntity.ok()
-                    .header(HttpHeaders.AUTHORIZATION, response.getToken())
-                    .body(response);
+        public UserLoginResponse login(UserLoginRequest request) {
+            return userManagementService.login(request);
         }
     }
 

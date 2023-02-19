@@ -6,6 +6,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Optional;
+
 import static io.modicon.taskapp.infrastructure.exception.ApiException.exception;
 
 public interface UserDataSource {
@@ -37,5 +39,6 @@ public interface UserDataSource {
         public UserEntity save(UserEntity user) {
             return repository.save(user);
         }
+
     }
 }
